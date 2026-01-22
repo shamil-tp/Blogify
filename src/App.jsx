@@ -1,3 +1,5 @@
+import Login from "./pages/login"
+
 function App() {
 
   return (
@@ -5,6 +7,7 @@ function App() {
       <h1 class="text-3xl font-bold underline">
     Hello world!
   </h1>
+  <Login/>
     </>
   )
 }
