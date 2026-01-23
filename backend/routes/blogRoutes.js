@@ -1,4 +1,8 @@
-const routes = require('express').Router
+
+import express from "express";
+import { googleLogin } from "../controllers/auth.controller.js";
+
+const router = express.Router();
 
 routes
     .route('/viewblog/:slug')
@@ -7,4 +11,12 @@ routes
     .route('/postblog')
     .post(addBlog)
 
-module.exports = routes
+router.post("/google", googleLogin);
+
+
+export default router;
+
+
+
+
+
