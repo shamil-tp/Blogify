@@ -14,6 +14,7 @@ app.use(express.urlencoded())
 app.use(express.json())
 const blog = require('./routes/blogRoutes')
 
+
 app.use('/api',blog)
 
 app.listen(port,()=>{

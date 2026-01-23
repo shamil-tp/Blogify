@@ -15,7 +15,7 @@ import { NavLink } from 'react-router-dom'
 
 export const Sidebar = () => {
   return (
-    <CSidebar className="border-end h-screen" unfoldable>
+    <CSidebar className="border-end h-screen bg-slate-400" unfoldable>
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand>
             <CIcon icon={cilFootball} height={32} />
