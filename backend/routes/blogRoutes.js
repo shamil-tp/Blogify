@@ -1,21 +1,14 @@
-
-import express from "express";
-import { googleLogin } from "../controllers/auth.controller.js";
+const express = require("express");
 const router = express.Router();
-const { getBlog,addBlog } = require('../controllers/blogController')
-routes
-    .route('/viewblog/:slug')
-    .get(getBlog)
-routes
-    .route('/postblog')
-    .post(addBlog)
 
-router.post("/google", googleLogin);
+// const { googleLogin } = require("../controllers/auth.controller");
+const { getBlog, addBlog } = require("../controllers/blogController");
 
+// Blog routes
+router.get("/viewblog/:slug", getBlog);
+router.post("/postblog", addBlog);
 
-export default router;
+// Google auth route
+// router.post("/google", googleLogin);
 
-
-
-
-
+module.exports = router;
