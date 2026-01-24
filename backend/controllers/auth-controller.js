@@ -37,9 +37,15 @@ const googleLogin = async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    res.cookie("token", jwtToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     res.status(200).json({
       success: true,
-      jwt: jwtToken,
       user
     });
 
@@ -52,4 +58,19 @@ const googleLogin = async (req, res) => {
   }
 };
 
-module.exports = { googleLogin };
+const logout = (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production"
+  });
+
+  res.status(200).json({ success: true });
+};
+
+const me = (req, res) => {
+  res.status(200).json({ user: req.user });
+};
+
+
+module.exports = { googleLogin, logout, me };

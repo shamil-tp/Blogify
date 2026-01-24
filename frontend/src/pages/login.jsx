@@ -27,16 +27,18 @@ function Login() {
   const handleCredentialLogin = async (response) => {
     const res = await fetch("http://localhost:3000/api/auth/google", {
       method: "POST",
+      credentials: "include", // ✅ REQUIRED
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token: response.credential })
     });
 
+
     const data = await res.json();
 
     if (data.success) {
-      localStorage.setItem("token", data.jwt);
-      navigate("/home", { replace: true }); // ✅ go directly
+      navigate("/home", { replace: true });
     }
+
   };
 
   return (

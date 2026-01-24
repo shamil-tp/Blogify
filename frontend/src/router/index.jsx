@@ -6,26 +6,26 @@ import CreatePost from "../pages/CreatePost";
 import BlogView from "../pages/BlogView";
 import Login from "../pages/login";
 
+import StartPage from "../pages/startPage";
+
 const router = createBrowserRouter([
+  { path: "/", element: <StartPage /> },
+  { path: "/login", element: <Login /> },
+
   {
     element: <ProtectedRoute />,
     children: [
       {
-        path: "/",
         element: <RootLayout />,
         children: [
-          { index: true, element: <Navigate to="/home" replace /> },
-          { path: "home", element: <HomeFeed /> },
-          { path: "create", element: <CreatePost /> },
-          { path: "viewPost", element: <BlogView /> }
+          { path: "/home", element: <HomeFeed /> },
+          { path: "/create", element: <CreatePost /> },
+          { path: "/viewPost", element: <BlogView /> }
         ]
       }
     ]
-  },
-  {
-    path: "/login",
-    element: <Login />
   }
 ]);
 
-export default router; 
+
+export default router; // ✅ THIS FIXES THE ERROR
