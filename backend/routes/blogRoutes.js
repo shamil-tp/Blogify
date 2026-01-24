@@ -18,7 +18,8 @@ const router = express.Router();
 
 const { getBlog, addBlog } = require("../controllers/blogController");
 
-router.get("/viewblog/:slug", getBlog);
+// Blog routes
+router.get("/findblog/:slug", getBlog)
 router.post("/postblog", addBlog);
 
 module.exports = router;

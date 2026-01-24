@@ -11,7 +11,7 @@ const blogSchema = new mongoose.Schema({
     unique: true
   },
   content: {
-    type: Object, // Slate JSON
+    type: Object, 
     required: true
   }
 }, { timestamps: true })
