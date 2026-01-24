@@ -55,6 +55,7 @@ const initialValue = [
 
 // --- MAIN COMPONENT ---
 const CreatePost = () => {
+  
   // 1. Local state to track changes for the Save button
   const [value, setValue] = useState(initialValue)
 
@@ -154,6 +155,7 @@ const handleSave = async () => {
     </div>
   )
 }
+
 
 // --- HELPER FUNCTIONS ---
 

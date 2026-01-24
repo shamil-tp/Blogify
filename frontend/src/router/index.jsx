@@ -28,4 +28,4 @@ const router = createBrowserRouter([
   }
 ]);
 
-export default router; // ✅ THIS FIXES THE ERROR
+export default router; 
