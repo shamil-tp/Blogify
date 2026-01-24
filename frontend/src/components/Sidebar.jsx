@@ -15,7 +15,7 @@ import { NavLink } from 'react-router-dom'
 
 export const Sidebar = () => {
   return (
-    <CSidebar className="border-end h-screen bg-slate-400" unfoldable>
+    <CSidebar className="border-end !border-r !border-slate-800 h-screen !bg-slate-900" unfoldable>
       <CSidebarHeader className="border-bottom">
         <CSidebarBrand>
             <CIcon icon={cilFootball} height={32} />
@@ -23,7 +23,7 @@ export const Sidebar = () => {
       </CSidebarHeader>
 
       <CSidebarNav>
-        <CNavTitle>BLOGIFY</CNavTitle>
+        <CNavTitle className='!text-white'>BLOGIFY</CNavTitle>
 
         <CNavItem>
           <NavLink to="/home" className="nav-link">
