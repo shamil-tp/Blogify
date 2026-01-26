@@ -3,7 +3,6 @@ import ProtectedRoute from "./protectedRoute";
 import RootLayout from "../layouts/RootLayout";
 import HomeFeed from "../pages/HomeFeed";
 import CreatePost from "../pages/CreatePost";
-import BlogView from "../pages/BlogView";
 import Login from "../pages/login";
 
 import StartPage from "../pages/startPage";
@@ -20,7 +19,6 @@ const router = createBrowserRouter([
         children: [
           { path: "/home", element: <HomeFeed /> },
           { path: "/create", element: <CreatePost /> },
-          { path: "/viewPost", element: <BlogView /> }
         ]
       }
     ]
