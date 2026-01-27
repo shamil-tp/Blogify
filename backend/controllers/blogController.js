@@ -3,8 +3,7 @@ const slugify = require('slugify')
 const { nanoid } = require('nanoid')
 
 exports.addBlog = async (req, res) => {
-  try {
-    const { title, content } = req.body
+  const { title, content } = req.body
 
     if (!title || !content) {
       return res.status(400).json({ message: 'Missing fields' })
@@ -18,7 +17,8 @@ exports.addBlog = async (req, res) => {
     // create readable + unique slug
     const baseSlug = slugify(title, { lower: true, strict: true })
     const uniqueSlug = `${baseSlug}-${nanoid(6)}`
-
+  
+  try {
     const blog = await Blog.create({
       author:userId,
       title,
