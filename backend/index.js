@@ -39,9 +39,8 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-
-app.use(hpp())
 app.use(mongoSanitize())
+app.use(hpp())
 connectDB()
 
 app.use("/api/auth", authRoutes);
