@@ -1,54 +1,67 @@
-# Blogify
+# Blogify 📝
 
-**A modern, collaborative blogging platform built for speed and simplicity.**
+**A modern, collaborative blogging platform built for speed, security, and developer-centric content control.**
 
 ## About The Project
 
-**Blogify** is a web application that makes writing and sharing articles easy. It was built to solve a specific problem: giving developers more control over how their content is stored and displayed.
+**Blogify** is a full-stack web application designed to streamline the way developers write and share articles. The project focuses on structured content delivery, moving away from standard plain-text storage to a robust, custom-tailored data architecture.
 
-Instead of just saving plain text, Blogify uses a **custom-built engine** to handle content, making it a unique learning project and a powerful tool for blogging.
-
----
-
-## Key Features
-
-* **Custom Content Engine:** We built our own logic to convert JSON data into beautiful HTML styles automatically.
-* **Fully Responsive:** Looks great on laptops, tablets, and phones (powered by **Bootstrap**).
-* **High Performance:** Powered by **Vite** for lightning-fast build times and asset optimization.
-* **Organized Data:** Flexible database structure using **MongoDB**.
+Built as a high-performance **MERN** application, Blogify provides a seamless writing experience while giving authors granular control over their content's metadata and presentation.
 
 ---
 
-## The Tech Stack
+## 🚀 Key Features
 
-We used the **MEN Stack** + Bootstrap + Vite to build this application:
+* **Custom Slate.js Engine:** Uses a custom-built implementation to structure content into JSON format, ensuring consistent styling and portability.
+* **Modern UI/UX:** A clean, responsive interface built with **React 19**, **Tailwind CSS 4.0**, and **CoreUI** components.
+* **Secure Authentication:** Integrated **Google OAuth** for quick and secure user access.
+* **Developer-Friendly Build:** Optimized with **Vite** for near-instant hot module replacement (HMR).
+* **Robust Security:** Hardened backend using **Helmet**, **HPP**, **Rate Limiting**, and **Zod** for schema validation.
 
-* **Frontend:** EJS, Bootstrap 5, CSS3
+---
+
+## 🛠 The Tech Stack
+
+### Frontend
+* **Library:** React 19
+* **Styling:** Tailwind CSS 4.0 & CoreUI
+* **Editor:** Slate.js (Custom JSON Content Engine)
+* **State & Routing:** React Router 7
 * **Build Tool:** Vite
-* **Backend:** Node.js, Express.js
+
+### Backend
+* **Runtime:** Node.js
+* **Framework:** Express.js (v5)
+* **Authentication:** JWT & Google Auth Library
+* **Validation:** Zod
+
+### Database
 * **Database:** MongoDB
+* **ODM:** Mongoose
 
 ---
 
-## How It Works
+## ⚙️ How It Works
 
-The core of Blogify is unique. Here is the simple breakdown:
+The core logic of Blogify revolves around a structured data pipeline:
 
-1.  **The Input:** When you write a post, the system doesn't just save words. It structures your content into a strict **JSON format**.
-2.  **The Engine:** When a reader opens a post, our custom middleware reads that JSON.
-3.  **The Output:** The engine dynamically "paints" the HTML on the screen, applying styles and formatting instantly.
+1.  **The Input:** Authors use a custom editor powered by **Slate.js**. Instead of generating messy HTML, it outputs a clean **JSON tree** representing the document structure.
+2.  **The Storage:** This JSON object is validated via **Zod** and stored in **MongoDB** through **Mongoose** models.
+3.  **The Rendering:** On the frontend, our custom engine traverses the JSON tree and dynamically "paints" the content using Tailwind-styled React components.
+
+
 
 ---
 
-## How to Install & Run
+## 📦 Installation & Setup
 
-Follow these steps to get a copy of Blogify running on your local machine.
+Follow these steps to get a copy of Blogify running locally.
 
 ### Prerequisites
-* [Node.js](https://nodejs.org/) installed.
-* [MongoDB](https://www.mongodb.com/) installed and running locally.
+* [Node.js](https://nodejs.org/) (Latest LTS)
+* [MongoDB](https://www.mongodb.com/) account or local instance.
 
-### Installation Steps
+### Steps
 
 1.  **Clone the Repository**
     ```bash
@@ -56,29 +69,32 @@ Follow these steps to get a copy of Blogify running on your local machine.
     cd blogify
     ```
 
-2.  **Install Dependencies**
+2.  **Setup Backend**
     ```bash
+    cd backend
+    npm install
+    ```
+    Create a `.env` file in the `backend` folder and add your `MONGODB_URI`, `JWT_SECRET`, and `PORT`.
+
+3.  **Setup Frontend**
+    ```bash
+    cd ../frontend
     npm install
     ```
 
-3.  **Start the Database**
-    Make sure your MongoDB server is running in the background.
-
-4.  **Run the Development Server**
-    ```bash
-    npm run dev
-    ```
-    *(This usually runs the Vite server and Backend concurrently)*
+4.  **Run Development Servers**
+    * **Backend:** `npm run test` (uses nodemon)
+    * **Frontend:** `npm run dev` (uses vite)
 
 5.  **View the App**
-    Open your browser and visit: `http://localhost:3000` (or the port specified in your terminal).
+    Open `http://localhost:5173` for the frontend.
 
 ---
 
-## The Team
+## 👥 The Team
 
 This project was collaboratively designed and developed by:
 
-* [Shamil](https://github.com/shamil-tp)
-* [Sinan](https://github.com/sinanrahman/)
-* [Ranfees](https://github.com/Ranfees)
+* **Shamil** - [GitHub](https://github.com/shamil-tp)
+* **Sinan** - [GitHub](https://github.com/sinanrahman/)
+* **Ranfees** - [GitHub](https://github.com/Ranfees)
