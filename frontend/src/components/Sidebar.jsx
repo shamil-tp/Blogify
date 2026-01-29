@@ -11,12 +11,26 @@ import {
 import CIcon from '@coreui/icons-react'
 // 1. Import the Logout icon
 import { cilHome, cilPencil, cilFootball, cilBold, cilAccountLogout, cilNotes } from '@coreui/icons'
-import { NavLink } from 'react-router-dom' 
+import { NavLink, useNavigate } from 'react-router-dom' 
+import api from '../api/axios'
+
 
 
 
 export const Sidebar = () => {
   const [theme,setTheme] = useState(localStorage.getItem('theme'))
+    const navigate = useNavigate();
+    const handleLogout = async () => {
+    // stop NavLink default behavior
+
+    try {
+      await api.post("/api/auth/logout"); // clears cookie
+      navigate("/login", { replace: true }); // redirect
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  }
+
 
   useEffect(()=>{
     setTheme(localStorage.getItem('theme'))
@@ -59,7 +73,7 @@ export const Sidebar = () => {
            2. text-danger: Makes the text and icon red.
         */}
         <CNavItem className="mt-auto">
-          <NavLink to="/login" className="nav-link text-danger">
+          <NavLink onClick={handleLogout} className="nav-link text-danger">
             <CIcon customClassName="nav-icon text-danger" icon={cilAccountLogout} /> Logout
           </NavLink>
         </CNavItem>

@@ -79,3 +79,28 @@ exports.getUserBlogs = async (req,res)=>{
     return res.status(501).json({message:'error from backend',error:e})
   }
 }
+
+exports.deleteUserPost = async (req,res)=>{
+  try{
+    console.log("on delete")
+    const postId = req.params.postId
+    const userId = req.user._id
+    if(!postId){
+      return res.status(401).json({message:'error post id not found'})
+    }
+    if(!userId){
+      return res.status(401).json({message:'user not available'})
+    }
+    let result = await Blog.deleteOne({_id:postId,author:userId})
+    if (result.deletedCount === 1) {
+    console.log("Successfully deleted the blog post.");
+    res.status(200).json({message:"Successfully deleted the blog post."})
+} else {
+    console.log("No post found with that ID or you are not the author.");
+    res.status(401).json({message:"No post found with that ID or you are not the author."})
+}
+  }catch(e){
+    console.log(e)
+    return res.status(500).json({message:'error from backend',error:e})
+  }
+}
