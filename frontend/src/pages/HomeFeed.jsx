@@ -203,7 +203,14 @@ export default function HomeFeed() {
   day: 'numeric', 
   year: 'numeric'
 }).toUpperCase()}</span>
-                <i class="bi bi-trash3" onClick={deletePost(post._id)}></i>
+                <i 
+  className="bi bi-trash3 hover:text-red-500 transition-colors cursor-pointer" 
+  onClick={(e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    deletePost(post._id);
+  }}
+></i>
                 
                 </div>
               </div>
