@@ -26,6 +26,7 @@ const googleLogin = async (req, res) => {
 
       const validation = userSchema.safeParse(payload)
       if(!validation.success){
+        console.log('hereee')
         return res.status(401).json({error:"error validation error"})
       }
     
@@ -61,13 +62,13 @@ const googleLogin = async (req, res) => {
       user
     });
 
-  } catch (error) {
-    console.error(error);
-    res.status(401).json({
-      success: false,
-      message: "Google authentication failed"
-    });
-  }
+  }  catch (error) {
+  console.error("Authentication Error Details:", error.message); // <-- ADD THIS LINE
+  res.status(401).json({
+    success: false,
+    message: "Google authentication failed"
+  });
+}
 };
 
 const logout = (req, res) => {

@@ -29,6 +29,7 @@ function Login() {
   }, [isDark]);
 
   const handleCredentialLogin = async (response) => {
+    console.log(response)
     const res = await fetch("http://localhost:3000/api/auth/google", {
       method: "POST",
       credentials: "include",
