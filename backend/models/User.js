@@ -11,7 +11,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       unique: true
     },
-    picture: String
+    picture: String,
+    Rtoken:{
+      token: String,
+      duration: Date
+    }
   },
   { timestamps: true }
 );

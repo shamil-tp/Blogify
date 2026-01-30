@@ -14,7 +14,6 @@ exports.addBlog = async (req, res) => {
     return res.status(401).json({ message: 'user not found in db' })
   }
 
-  // create readable + unique slug
   const baseSlug = slugify(title, { lower: true, strict: true })
   const uniqueSlug = `${baseSlug}-${nanoid(6)}`
 

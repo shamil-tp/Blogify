@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   CSidebar,
   CSidebarBrand,
@@ -9,8 +9,7 @@ import {
 } from '@coreui/react'
 
 import CIcon from '@coreui/icons-react'
-// 1. Import the Logout icon
-import { cilHome, cilPencil, cilFootball, cilBold, cilAccountLogout, cilNotes } from '@coreui/icons'
+import { cilHome, cilPencil, cilAccountLogout, cilNotes } from '@coreui/icons'
 import { NavLink, useNavigate } from 'react-router-dom' 
 import api from '../api/axios'
 
@@ -21,11 +20,10 @@ export const Sidebar = () => {
   const [theme,setTheme] = useState(localStorage.getItem('theme'))
     const navigate = useNavigate();
     const handleLogout = async () => {
-    // stop NavLink default behavior
 
     try {
-      await api.post("/api/auth/logout"); // clears cookie
-      navigate("/login", { replace: true }); // redirect
+      await api.post("/api/auth/logout");
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error("Logout failed", error);
     }
@@ -46,7 +44,6 @@ export const Sidebar = () => {
 
 
       </CSidebarHeader>
-
       <CSidebarNav>
         <CNavTitle>MENU</CNavTitle>
 
@@ -61,17 +58,6 @@ export const Sidebar = () => {
             <CIcon customClassName="nav-icon" icon={cilPencil} /> Compose
           </NavLink>
         </CNavItem>
-
-        {/* <CNavItem>
-          <NavLink to="/viewPost" className="nav-link">
-            <CIcon customClassName="nav-icon" icon={cilBold} /> View Blog
-          </NavLink>
-        </CNavItem> */}
-
-        {/* THE LOGOUT BUTTON
-           1. mt-auto: Pushes this item to the very bottom of the sidebar.
-           2. text-danger: Makes the text and icon red.
-        */}
         <CNavItem className="mt-auto">
           <NavLink onClick={handleLogout} className="nav-link text-danger">
             <CIcon customClassName="nav-icon text-danger" icon={cilAccountLogout} /> Logout

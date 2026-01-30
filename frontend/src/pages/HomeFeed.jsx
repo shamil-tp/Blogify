@@ -3,11 +3,6 @@ import { Link } from "react-router-dom";
 import api from '../api/axios'
 import { useNavigate } from "react-router-dom";
 
-
-// dummyPosts removed for clarity
-
-
-// --- NEW MODAL COMPONENT ---
 const DeleteConfirmationModal = ({ show, onClose, onConfirm, postTitle }) => {
   if (!show) return null;
 

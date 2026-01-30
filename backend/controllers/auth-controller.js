@@ -1,6 +1,7 @@
 const { OAuth2Client } = require("google-auth-library");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const tokenizer = require("../utils/tokenizer");
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -20,7 +21,6 @@ const googleLogin = async (req, res) => {
     const { sub, name, email, picture } = payload;
     // Find or create user
     let user = await User.findOne({ googleId:sub });
-
     if(!user){
       user = await User.create({
         googleId:sub,
@@ -29,7 +29,8 @@ const googleLogin = async (req, res) => {
         picture
       });
     }
-
+    let accessToken = await tokenizer(user,res)
+    console.log(accessToken)
     // Create your own JWT
     const jwtToken = jwt.sign(
       { userId: user._id },
