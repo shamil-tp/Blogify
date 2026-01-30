@@ -72,6 +72,7 @@ const CreatePost = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = Boolean(id);
+    const [loading, setLoading] = useState(isEditMode);
 
   const [value, setValue] = useState(initialValue)
   const [title, setTitle] = useState('')
@@ -92,12 +93,16 @@ const CreatePost = () => {
   const fetchPost = async () => {
     try {
       const res = await api.get(`/api/blog/${id}`);
+
       setTitle(res.data.blog.title);
+
       setValue(
-        Array.isArray(res.data.blog.content)
+        Array.isArray(res.data.blog.content) && res.data.blog.content.length
           ? res.data.blog.content
           : initialValue
       );
+
+      setLoading(false);
     } catch (err) {
       console.error("Failed to load blog", err);
     }
@@ -105,6 +110,7 @@ const CreatePost = () => {
 
   fetchPost();
 }, [id, isEditMode]);
+
 
 
   useEffect(() => {
@@ -153,7 +159,7 @@ const CreatePost = () => {
 const handleSave = async () => {
   try {
     if (isEditMode) {
-      await api.put(`/api/blog/updateblog/${id}`, {
+      await api.post(`/api/blog/updateblog/${id}`, {
         title,
         content: value,
       });
@@ -172,6 +178,9 @@ const handleSave = async () => {
   }
 };
 
+    if (loading) {
+  return <div className="text-center mt-20">Loading editor...</div>;
+}
 
   return (
     <div className="min-h-screen transition-colors duration-500 py-10 px-4 bg-slate-50 dark:bg-[#0f172a] font-['Inter',_sans-serif]">
@@ -223,7 +232,7 @@ const handleSave = async () => {
               autoFocus
             />
 
-            <Slate editor={editor} initialValue={initialValue} onChange={setValue}>
+            <Slate editor={editor} initialValue={value} onChange={setValue}>
               <div className="sticky top-0 z-10 bg-white/95 dark:bg-[#1e293b]/95 backdrop-blur-sm transition-colors duration-500 rounded mb-5">
                <ToolbarContainer>
   {/* Basic Text Styles */}

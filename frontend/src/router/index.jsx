@@ -5,6 +5,7 @@ import HomeFeed from "../pages/HomeFeed";
 import CreatePost from "../pages/CreatePost";
 import Login from "../pages/login";
 
+
 import StartPage from "../pages/startPage";
 
 const router = createBrowserRouter([
@@ -19,8 +20,7 @@ const router = createBrowserRouter([
         children: [
           { path: "/home", element: <HomeFeed /> },
           { path: "/create", element: <CreatePost /> },
-           { path: "/edit/:id", element: <CreatePost /> },
-        ]
+          { path: "/edit/:id", element: <CreatePost  /> }]
       }
     ]
   }
