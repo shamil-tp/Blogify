@@ -29,10 +29,15 @@ const initialValue = [
 
 // --- SLATE PLUGINS ---
 const withEmbeds = editor => {
-  const { isVoid } = editor
-  // Images and Videos are void elements: they have no editable text content inside them
+  const { isVoid, isInline } = editor
+
+  // THIS IS KEY: Images must be inline for text to wrap
+  editor.isInline = element => 
+    element.type === 'image' ? true : isInline(element)
+
   editor.isVoid = element => 
     ['image', 'video'].includes(element.type) ? true : isVoid(element)
+
   return editor
 }
 
@@ -342,43 +347,50 @@ const ImageElement = ({ attributes, children, element }) => {
     Transforms.setNodes(editor, newProps, { at: path })
   }
 
-  // Determine alignment classes
-  let floatClass = "w-full flex justify-center mb-4" // Default (Center/Full)
-  if (element.align === 'left') floatClass = "float-left mr-6 mb-4 clear-left"
-  if (element.align === 'right') floatClass = "float-right ml-6 mb-4 clear-right"
+  // Logic for wrapping text
+  const isFloating = element.align === 'left' || element.align === 'right'
+  
+  const containerStyle = {
+    float: element.align === 'left' ? 'left' : element.align === 'right' ? 'right' : 'none',
+    margin: element.align === 'left' ? '0 20px 10px 0' : element.align === 'right' ? '0 0 10px 20px' : '0 auto 20px auto',
+    width: element.width || '100%',
+    display: isFloating ? 'inline-block' : 'block',
+    userSelect: 'none'
+  }
 
   return (
-    <div {...attributes} className={floatClass} style={{ width: element.align === 'center' ? '100%' : element.width || '33%' }}>
-      <div contentEditable={false} className="relative group w-full">
+    <span // Must be span for inline elements
+      {...attributes}
+      style={containerStyle}
+      className="relative group transition-all duration-300"
+    >
+      <div contentEditable={false} className="relative">
         {selected && (
-          <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex gap-1 bg-slate-900 dark:bg-slate-100 p-1 rounded-lg shadow-xl z-30 transition-all scale-90">
-            {/* Float Controls */}
-            <button onClick={() => setProperty({ align: 'left', width: '33%' })} className={`p-1.5 rounded ${element.align === 'left' ? 'bg-indigo-500' : 'hover:bg-slate-700'}`} title="Float Left"><ToolbarIcon>format_align_left</ToolbarIcon></button>
-            <button onClick={() => setProperty({ align: 'center', width: '100%' })} className={`p-1.5 rounded ${element.align === 'center' || !element.align ? 'bg-indigo-500' : 'hover:bg-slate-700'}`} title="Center Full"><ToolbarIcon>format_align_center</ToolbarIcon></button>
-            <button onClick={() => setProperty({ align: 'right', width: '33%' })} className={`p-1.5 rounded ${element.align === 'right' ? 'bg-indigo-500' : 'hover:bg-slate-700'}`} title="Float Right"><ToolbarIcon>format_align_right</ToolbarIcon></button>
+          <div className="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-slate-900 text-white p-1 rounded-lg shadow-2xl z-50 whitespace-nowrap">
+            {/* ALIGNMENT */}
+            <button onClick={() => setProperty({ align: 'left', width: '33%' })} className={`p-1 rounded ${element.align === 'left' ? 'bg-indigo-500' : ''}`}><ToolbarIcon>format_align_left</ToolbarIcon></button>
+            <button onClick={() => setProperty({ align: 'center', width: '100%' })} className={`p-1 rounded ${element.align === 'center' ? 'bg-indigo-500' : ''}`}><ToolbarIcon>format_align_center</ToolbarIcon></button>
+            <button onClick={() => setProperty({ align: 'right', width: '33%' })} className={`p-1 rounded ${element.align === 'right' ? 'bg-indigo-500' : ''}`}><ToolbarIcon>format_align_right</ToolbarIcon></button>
             
-            <div className="w-[1px] bg-slate-700 mx-1"></div>
+            <div className="w-[1px] h-4 bg-slate-700 mx-1" />
             
-            {/* Size Controls (Only show if floated) */}
-            {element.align !== 'center' && (
-              <>
-                <button onClick={() => setProperty({ width: '25%' })} className="px-2 text-[10px] font-bold text-white dark:text-slate-900">S</button>
-                <button onClick={() => setProperty({ width: '50%' })} className="px-2 text-[10px] font-bold text-white dark:text-slate-900">M</button>
-              </>
-            )}
+            {/* RATIO / SIZE */}
+            <button onClick={() => setProperty({ width: '25%' })} className="px-2 text-[10px] font-bold hover:text-indigo-400">25%</button>
+            <button onClick={() => setProperty({ width: '50%' })} className="px-2 text-[10px] font-bold hover:text-indigo-400">50%</button>
+            <button onClick={() => setProperty({ width: '100%' })} className="px-2 text-[10px] font-bold hover:text-indigo-400">100%</button>
             
-            <button onClick={() => Transforms.removeNodes(editor, { at: path })} className="p-1.5 rounded hover:bg-red-500 text-red-400 hover:text-white"><ToolbarIcon>delete</ToolbarIcon></button>
+            <button onClick={() => Transforms.removeNodes(editor, { at: path })} className="p-1 text-red-400 hover:text-red-200"><ToolbarIcon>delete</ToolbarIcon></button>
           </div>
         )}
         <img
           src={element.url}
-          alt="Article"
-          className={`rounded-lg transition-all duration-300 w-full ${selected ? 'ring-4 ring-indigo-500 shadow-2xl' : 'shadow-md'}`}
+          alt=""
+          className={`rounded-lg transition-all ${selected ? 'ring-4 ring-indigo-500 shadow-xl' : 'shadow-sm'}`}
+          style={{ width: '100%', display: 'block' }}
         />
       </div>
-      {/* Slate requirement: void elements must render children */}
       {children}
-    </div>
+    </span>
   )
 }
 const VideoElement = ({ attributes, children, element }) => {
@@ -428,10 +440,19 @@ const Leaf = ({ attributes, children, leaf }) => {
 // --- SLATE HELPERS ---
 
 const insertImage = (editor, url) => {
-  const text = { text: '' }
-  const image = { type: 'image', url, width: '100%', children: [text] }
-  Transforms.insertNodes(editor, image)
-  Transforms.insertNodes(editor, { type: 'paragraph', children: [{ text: '' }] })
+  const image = { 
+    type: 'image', 
+    url, 
+    width: '33%', // Default to small so text wraps immediately
+    align: 'left', // Default to left so you can write on the right
+    children: [{ text: '' }] 
+  }
+  
+  // Inserting with spaces around it prevents Slate from getting stuck
+  Transforms.insertNodes(editor, [
+    image,
+    { text: ' ' } // This space allows you to start typing beside the image
+  ])
 }
 
 const insertEmbed = (editor, url) => {
