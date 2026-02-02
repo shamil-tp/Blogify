@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Viewer</title>
+    
+    <!-- FONTS FOR VARIOUS THEMES -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&family=Lexend:wght@100..900&family=Oswald:wght@200..700&family=Fira+Code:wght@300..700&family=Merriweather:wght@300;400;700;900&family=Roboto:wght@100;300;400;500;700;900&family=Orbitron:wght@400..900&family=Cinzel:wght@400..900&family=Playfair+Display:wght@400..900&family=Quicksand:wght@300..700&family=Nunito:wght@200..1000&display=swap" rel="stylesheet">
+
+    <!-- Basic Reset -->
+    <style>
+        body { margin: 0; padding: 0; background-color: #f0f0f0; }
+        #canvas { min-height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="canvas"></div>
+    
+    <!-- MESSAGE FOR NO SLUG -->
+    <div id="error-msg" style="display:none; text-align:center; padding: 50px; font-family: sans-serif; color: #666;">
+        <h2>No Blog Slug Provided</h2>
+        <p>Add <code>?slug=YOUR_SLUG&theme=YOUR_THEME</code> to the URL.</p>
+    </div>
+</body>
+
+<!-- Import the Renderer Library -->
+<script src="./blogRenderer.js"></script>
+
+<script>
+    // URL Parameter Parsing
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+    const theme = params.get('theme'); // Optional
+
+    console.log("Slug:", slug, "| Theme:", theme);
+
+    if (slug) {
+        // defined in blogRenderer.js
+        if (typeof generateBlog === 'function') {
+            generateBlog(slug, theme);
+        } else {
+            console.error("generateBlog function not found. Ensure blogRenderer.js is loaded correctly.");
+            document.body.innerHTML = "<h3 style='text-align:center; color:red; margin-top:50px;'>Error: Renderer Library not loaded.</h3>";
+        }
+    } else {
+        document.getElementById('error-msg').style.display = 'block';
+    }
+</script>
+</html>
