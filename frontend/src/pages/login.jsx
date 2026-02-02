@@ -32,7 +32,7 @@ function Login() {
   const handleCredentialLogin = async (response) => {
     console.log(response)
     try {
-      const res = await fetch("http://localhost:3000/api/auth/google", {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/google`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

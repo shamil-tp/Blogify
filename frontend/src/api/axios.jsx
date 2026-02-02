@@ -2,7 +2,7 @@ import axios from "axios";
 import secureLocalStorage from "react-secure-storage";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: import.meta.env.VITE_BACKEND_URL,
   withCredentials:true
 }); // credentials not needed for Bearer token auth
 
@@ -44,7 +44,7 @@ api.interceptors.response.use(
         }
 
         console.log("Axios Interceptor: Sending Refresh Request...");
-        const res = await axios.post("http://localhost:3000/api/auth/refresh", {
+        const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/refresh`, {
           refreshToken,
         });
 
