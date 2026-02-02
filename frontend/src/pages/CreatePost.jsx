@@ -381,7 +381,7 @@ const ImageElement = ({ attributes, children, element }) => {
     const setProperty = (event, newProps) => {
         // IMPORTANT: Prevent the editor from losing focus when clicking the button
         event.preventDefault()
-        
+
         try {
             const path = ReactEditor.findPath(editor, element)
             Transforms.setNodes(editor, newProps, { at: path })
@@ -414,48 +414,48 @@ const ImageElement = ({ attributes, children, element }) => {
         <span {...attributes} style={containerStyle} className="relative group transition-all">
             <div contentEditable={false} className="relative">
                 {selected && focused && (
-                    <div 
+                    <div
                         className="absolute -top-14 left-0 flex items-center gap-2 bg-[#1e293b] text-white px-3 py-2 rounded-xl shadow-2xl z-50"
                         onMouseDown={e => e.preventDefault()} // Stops focus from leaving the image
                     >
-                        <button 
-                            onMouseDown={(e) => setProperty(e, { align: 'left', width: '33%' })} 
+                        <button
+                            onMouseDown={(e) => setProperty(e, { align: 'left', width: '33%' })}
                             className={`p-1.5 rounded-lg hover:bg-slate-700 ${element.align === 'left' ? 'bg-indigo-600' : ''}`}
                         >
                             <ToolbarIcon>format_align_left</ToolbarIcon>
                         </button>
-                        
-                        <button 
-                            onMouseDown={(e) => setProperty(e, { align: 'center', width: '100%' })} 
+
+                        <button
+                            onMouseDown={(e) => setProperty(e, { align: 'center', width: '100%' })}
                             className={`p-1.5 rounded-lg hover:bg-slate-700 ${element.align === 'center' ? 'bg-indigo-600' : ''}`}
                         >
                             <ToolbarIcon>format_align_center</ToolbarIcon>
                         </button>
-                        
-                        <button 
-                            onMouseDown={(e) => setProperty(e, { align: 'right', width: '33%' })} 
+
+                        <button
+                            onMouseDown={(e) => setProperty(e, { align: 'right', width: '33%' })}
                             className={`p-1.5 rounded-lg hover:bg-slate-700 ${element.align === 'right' ? 'bg-indigo-600' : ''}`}
                         >
                             <ToolbarIcon>format_align_right</ToolbarIcon>
                         </button>
-                        
+
                         <div className="w-[1px] h-6 bg-slate-700 mx-1" />
-                        
+
                         <button onMouseDown={(e) => setProperty(e, { width: '25%' })} className="px-2 py-1 text-sm font-bold hover:text-indigo-400">25%</button>
                         <button onMouseDown={(e) => setProperty(e, { width: '50%' })} className="px-2 py-1 text-sm font-bold hover:text-indigo-400">50%</button>
                         <button onMouseDown={(e) => setProperty(e, { width: '100%' })} className="px-2 py-1 text-sm font-bold hover:text-indigo-400">100%</button>
-                        
+
                         <div className="w-[1px] h-6 bg-slate-700 mx-1" />
-                        
-                        <button 
-                            onMouseDown={deleteImage} 
+
+                        <button
+                            onMouseDown={deleteImage}
                             className="p-1.5 text-red-400 hover:bg-red-500/20 rounded-lg"
                         >
                             <ToolbarIcon>delete</ToolbarIcon>
                         </button>
                     </div>
                 )}
-                
+
                 <img
                     src={element.url}
                     alt=""
@@ -470,7 +470,7 @@ const ImageElement = ({ attributes, children, element }) => {
 const VideoElement = ({ attributes, children, element }) => {
     const editor = useSlate()
     const path = ReactEditor.findPath(editor, element)
-    const selected = useSlate().selection && Path.isPath(useSlate().selection.focus.path)
+    const selected = useSelected()
 
     const getEmbedUrl = (url) => {
         if (url.includes('youtube.com/watch?v=')) return url.replace('watch?v=', 'embed/')
