@@ -36,7 +36,7 @@ const TextWidget = ({ id, content, onChange, readOnly = false }) => {
                 modules={readOnly ? { toolbar: false } : modules}
                 formats={formats}
                 readOnly={readOnly}
-                className="h-full flex flex-col"
+                className="h-full flex flex-col dark:bg-slate-800 dark:text-slate-100"
                 style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
             />
             {/* Override Quill internal styles locally for flex growth and THEMING */}

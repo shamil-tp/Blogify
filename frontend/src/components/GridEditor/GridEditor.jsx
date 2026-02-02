@@ -132,7 +132,7 @@ const GridEditor = ({ widgets, setWidgets, readOnly = false }) => {
                             </div>
                         )}
 
-                        <div className="h-full w-full overflow-hidden flex-grow" onMouseDown={e => e.stopPropagation()}>
+                        <div className="h-full w-full overflow-hidden flex-grow rounded-xl" onMouseDown={e => e.stopPropagation()}>
                             {/* Content Render */}
                             {widget.type === 'text' && (
                                 <TextWidget

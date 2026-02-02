@@ -270,7 +270,18 @@ const CreatePost = () => {
                             placeholder="Title..."
                             value={title}
                             onChange={e => setTitle(e.target.value)}
-                            className="w-full mb-8 font-['Outfit',_sans-serif] text-2xl md:text-4xl font-bold bg-transparent border-none focus:outline-none p-0 text-slate-700 placeholder:text-slate-300 dark:placeholder:text-slate-600 dark:text-slate-300"
+                            style={{
+                                padding: "1rem",
+                                margin: "1rem",
+                                borderRadius: "1rem",
+                                border: "none",
+                                outline: "none",
+                                fontSize: "2rem",
+                                fontWeight: "bold",
+                                backgroundColor: "transparent",
+                                transition: "all 0.3s ease",
+                            }}
+                            className="w-full font-['Outfit',_sans-serif] text-[#ffffffff] text-2xl md:text-4xl font-bold bg-transparent border-none focus:outline-none p-0 text-slate-700 placeholder:text-slate-300 dark:placeholder:text-slate-600 dark:text-slate-500"
                         />
 
                         {/* TOOLBAR */}
