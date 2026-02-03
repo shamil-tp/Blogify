@@ -86,12 +86,13 @@ const CreatePost = () => {
                 if (Array.isArray(loadedContent) && loadedContent.length > 0) {
                     if (loadedContent[0].layout && loadedContent[0].id) {
                         // Widget format present. Ensure text content is string (Quill) not object (Slate)
-                        const fixedWidgets = loadedContent.map(w => {
-                            if (w.type === 'text' && typeof w.content === 'object') {
-                                return { ...w, content: '<p><em>(Legacy content format)</em></p>' };
+                        const fixedWidgets = loadedContent.map(w => ({
+                            ...w,
+                            layout: {
+                                ...w.layout,
+                                y: typeof w.layout.y === "number" ? w.layout.y : Infinity
                             }
-                            return w;
-                        });
+                        }));
                         setWidgets(fixedWidgets);
                     } else {
                         // Old Slate JSON (pure array)
@@ -194,12 +195,11 @@ const CreatePost = () => {
                 ...w,
                 layout: {
                     ...w.layout,
-                    // JSON.stringify turns Infinity to null. RGL uses Infinity for "bottom".
-                    // We must convert it to a real number or let the backend handle it.
-                    // Assuming safe fallback to a large number if it's new.
-                    y: (w.layout.y === Infinity || w.layout.y === null) ? 999999 : w.layout.y
+                    // KEEP Infinity — react-grid-layout understands it
+                    y: w.layout.y
                 }
             }));
+
 
 
             const payload = {

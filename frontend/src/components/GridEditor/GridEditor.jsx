@@ -66,6 +66,18 @@ const GridEditor = ({ widgets, setWidgets, readOnly = false }) => {
         setWidgets(updatedWidgets);
     }
 
+    const layouts = {
+        lg: widgets.map(w => ({
+            i: w.id,
+            x: w.layout.x,
+            y: w.layout.y,
+            w: w.layout.w,
+            h: w.layout.h,
+            minW: 2,
+            minH: 2
+        }))
+    };
+
     const handleContentChange = (id, newContent) => {
         const updatedWidgets = widgets.map(w =>
             w.id === id ? { ...w, content: newContent } : w
@@ -81,21 +93,22 @@ const GridEditor = ({ widgets, setWidgets, readOnly = false }) => {
         <div className="w-full min-h-[500px] overflow-x-hidden overflow-y-scroll" ref={containerRef}>
             <Responsive
                 className="layout min-h-[500px] rounded-xl"
-                // No 'layouts' prop here
+                layouts={layouts}
                 width={width}
+                key={widgets.length}
                 breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
                 cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
                 rowHeight={30}
-                onLayoutChange={onLayoutChange}
                 onDragStop={onLayoutStop}
                 onResizeStop={onLayoutStop}
                 isDraggable={!readOnly}
                 isResizable={!readOnly}
-                margin={[10, 10]}
-                containerPadding={[20, 20]}
-                useCSSTransforms={true}
+                compactType={null}
+                preventCollision
+                useCSSTransforms
                 draggableHandle=".grid-drag-handle"
             >
+
                 {widgets.map(widget => (
                     <div
                         key={widget.id}
