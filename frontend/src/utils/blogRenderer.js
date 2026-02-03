@@ -461,23 +461,54 @@ function renderBlogPost(blog, theme) {
  * Creates a Grid Item (Text, Image, or Video)
  */
 function createGridItem(widget, theme) {
-    const { x, w, h } = widget.layout; // Remove 'y' from here
+    const { x, y, w, h } = widget.layout;
 
+    // Wrapper Div for Grid Positioning
+    // Wrapper Div for Grid Positioning
     const wrapper = document.createElement('div');
-    
-    // Keep the horizontal (x) position and width (w)
     wrapper.style.gridColumnStart = x + 1;
     wrapper.style.gridColumnEnd = `span ${w}`;
+    wrapper.style.gridRowStart = y + 1;
+    wrapper.style.gridRowEnd = `span ${h}`;
 
-    /* --- CHANGE HERE --- */
-    // Remove gridRowStart and gridRowEnd to let items stack naturally
-    // OR set it to auto:
-    wrapper.style.gridRow = "auto"; 
-    wrapper.style.marginBottom = "20px"; // Add some consistent spacing
-    /* ------------------- */
-
+    // CHANGE THIS: Change 'hidden' to 'visible' so the full content shows
     wrapper.style.overflow = 'visible';
-    // ... rest of your code ...
+
+    // Render Content based on Type
+    if (widget.type === 'text') {
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('ql-content');
+        contentDiv.innerHTML = widget.content;
+
+        contentDiv.style.width = '100%';
+        // Ensure height is not locked to 100% of the small grid box
+        contentDiv.style.height = 'auto';
+        contentDiv.style.overflow = 'visible';
+
+        wrapper.append(contentDiv);
+    }
+    else if (widget.type === 'image') {
+        const img = document.createElement('img');
+        img.src = widget.content;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '8px';
+        wrapper.append(img);
+    }
+    else if (widget.type === 'video') {
+        const iframe = document.createElement('iframe');
+        iframe.src = getEmbedUrl(widget.content);
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = '0';
+        iframe.style.borderRadius = '8px';
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        iframe.allowFullscreen = true;
+        wrapper.append(iframe);
+    }
+
+    return wrapper;
 }
 
 /**
