@@ -3,6 +3,7 @@ const slugify = require('slugify')
 const { nanoid } = require('nanoid')
 
 exports.addBlog = async (req, res) => {
+
   const { title, content } = req.body
 
   if (!title || !content) {
@@ -10,11 +11,13 @@ exports.addBlog = async (req, res) => {
   }
 
   const userId = req.user._id
+
   if (!userId) {
     return res.status(401).json({ message: 'user not found in db' })
   }
 
   const baseSlug = slugify(title, { lower: true, strict: true })
+
   const uniqueSlug = `${baseSlug}-${nanoid(6)}`
 
   try {
@@ -64,14 +67,19 @@ exports.getBlog = async (req, res) => {
 exports.getUserBlogs = async (req, res) => {
   try {
     const userId = req.user._id
+
     if (!userId) {
       return res.status(401).json({ message: 'user not found' })
     }
+
     const userBlogs = await Blog.find({ author: userId }).populate('author', 'name')
+
     if (!userBlogs) {
       return res.status(401).json({ message: "no blogs found" })
     }
+
     return res.status(200).json({ message: 'blogs found', success: true, blogs: userBlogs })
+
   } catch (e) {
     console.log('error while finding from db')
     console.log(e)
@@ -81,20 +89,23 @@ exports.getUserBlogs = async (req, res) => {
 
 exports.deleteUserPost = async (req, res) => {
   try {
-    console.log("on delete")
     const postId = req.params.postId
     const userId = req.user._id
+
     if (!postId) {
       return res.status(401).json({ message: 'error post id not found' })
     }
+
     if (!userId) {
       return res.status(401).json({ message: 'user not available' })
     }
+
     let result = await Blog.deleteOne({ _id: postId, author: userId })
+
     if (result.deletedCount === 1) {
-      console.log("Successfully deleted the blog post.");
       res.status(200).json({ message: "Successfully deleted the blog post." })
-    } else {
+    } 
+    else {
       console.log("No post found with that ID or you are not the author.");
       res.status(401).json({ message: "No post found with that ID or you are not the author." })
     }
@@ -106,11 +117,8 @@ exports.deleteUserPost = async (req, res) => {
 
 exports.getBlogById = async (req, res) => {
   try {
-    console.log("on edit")
-    let blogId= req.params.postId
-    const blog= await Blog.findOne({_id:blogId})
-    console.log("blogId= " ,blogId)
-    console.log(blog)
+    let blogId = req.params.postId
+    const blog = await Blog.findOne({ _id: blogId })
 
     if (!blog) {
       return res.status(404).json({
