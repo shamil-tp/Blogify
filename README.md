@@ -111,3 +111,169 @@ This project was collaboratively designed and developed by:
 ---
 
 OG Docs is built with collaboration at its core—designed to help teams write, iterate, and ship documentation together, faster and cleaner.
+
+
+
+
+
+
+
+
+
+
+frontend/src/
+├── collaboration/
+│   ├── socket.js
+│   ├── ydoc.js
+│   ├── awareness.js
+│   └── collabTypes.js
+│
+├── hooks/
+│   ├── useAuth.jsx
+│   └── useCollaboration.js   ← NEW
+│
+├── components/
+│   └── GridEditor/
+│       ├── GridEditor.jsx
+│       ├── withCollaboration.js ← NEW
+│       ├── TextWidget.jsx
+│       ├── ImageWidget.jsx
+│       └── VideoWidget.jsx
+
+
+
+
+
+
+
+
+backend/
+├── socket/
+│   ├── index.js
+│   ├── auth.js
+│   ├── rooms.js
+│   └── handlers/
+│       ├── joinDoc.js
+│       ├── syncUpdate.js
+│       ├── awareness.js
+│       └── disconnect.js
+│
+├── collaboration/
+│   ├── yjs/
+│   │   ├── createDoc.js
+│   │   └── applyUpdate.js
+│   └── persistence/
+│       ├── loadSnapshot.js
+│       └── saveSnapshot.js
+
+
+
+
+
+👤 Teammate A — Backend (Realtime Engine)
+🎯 Responsibility
+
+Everything related to:
+
+Socket.IO
+
+Yjs document sync
+
+MongoDB snapshots
+
+📁 Files they touch
+backend/
+├── socket/
+├── collaboration/
+├── models/Blog.js
+
+
+They do NOT touch frontend.
+
+🔧 Their Tasks (Very Exact)
+A1 — Socket.IO server
+
+Attach Socket.IO to Express
+
+JWT auth on connection
+
+Rooms per blogId
+
+A2 — Yjs document manager
+
+Create Yjs doc per blog
+
+Load collabSnapshot
+
+Keep docs in memory
+
+A3 — Sync protocol
+
+Receive Yjs updates
+
+Broadcast to room
+
+Prevent echo loops
+
+A4 — Persistence
+
+Save snapshot when:
+
+last user leaves
+
+OR every 30s
+
+📦 Output
+
+socket.emit("doc:update", update)
+socket.emit("doc:sync", state)
+
+
+
+
+
+👤 Teammate B — Frontend (Quill + Yjs)
+🎯 Responsibility
+
+Bind Quill editor → Yjs → Socket.IO.
+
+📁 Files they touch
+frontend/src/
+├── collaboration/
+│   ├── socket.js
+│   ├── ydoc.js
+│   └── awareness.js
+│
+├── components/GridEditor/
+│   ├── GridEditor.jsx
+│   └── withCollaboration.js
+
+
+They do NOT touch backend.
+
+🔧 Their Tasks (Very Exact)
+B1 — Yjs + Quill binding
+
+Create Y.Doc
+
+Create Y.Text
+
+Bind using y-quill
+
+import { QuillBinding } from 'y-quill'
+
+B2 — Socket sync
+
+Send Yjs updates to backend
+
+Apply remote updates
+
+B3 — Presence & cursors
+
+Use quill-cursors
+
+Show colored cursors per user
+
+📦 Output
+
+<QuillEditor docId="..." />
