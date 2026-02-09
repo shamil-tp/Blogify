@@ -35,9 +35,17 @@ export const Sidebar = () => {
   },[localStorage.getItem('theme')])
 
   return (
-    <CSidebar className="border-end h-screen dark:bg-black dark:text-gray-400" unfoldable colorScheme={theme === 'dark' ? 'dark' : 'light'} size='sm'>
+    <>
+      <style>{`
+        .dark .nav-link { color: #9ca3af !important; }
+        .dark .nav-link:hover { color: #d1d5db !important; }
+        .dark .nav-icon { color: #9ca3af !important; }
+        .dark .sidebar-brand { color: #9ca3af !important; }
+        .dark .brand-text { color: #9ca3af !important; }
+      `}</style>
+      <CSidebar className="border-end h-screen dark:bg-black dark:text-gray-400" unfoldable colorScheme={theme === 'dark' ? 'dark' : 'light'} size='sm'>
       <CSidebarHeader className="border-bottom d-flex justify-content-center align-items-center dark:bg-black dark:border-gray-700">
-        <CSidebarBrand className="sidebar-brand d-flex align-items-center gap-2 dark:text-white">
+        <CSidebarBrand className="sidebar-brand d-flex align-items-center gap-2 dark:text-gray-400">
   <CIcon icon={cilNotes} height={28} />
   <span className="brand-text">ogDoc</span>
 </CSidebarBrand>
@@ -48,14 +56,14 @@ export const Sidebar = () => {
         <CNavTitle className="dark:text-gray-400">MENU</CNavTitle>
 
         <CNavItem>
-          <NavLink to="/home" className="nav-link">
-            <CIcon customClassName="nav-icon" icon={cilHome} /> Home
+          <NavLink to="/home" className="nav-link dark:text-gray-400">
+            <CIcon customClassName="nav-icon dark:text-gray-400" icon={cilHome} /> Home
           </NavLink>
         </CNavItem>
 
         <CNavItem>
-          <NavLink to="/create" className="nav-link">
-            <CIcon customClassName="nav-icon" icon={cilPencil} /> Compose
+          <NavLink to="/create" className="nav-link dark:text-gray-400">
+            <CIcon customClassName="nav-icon dark:text-gray-400" icon={cilPencil} /> Compose
           </NavLink>
         </CNavItem>
         <CNavItem className="mt-auto">
@@ -66,6 +74,7 @@ export const Sidebar = () => {
 
       </CSidebarNav>
     </CSidebar>
+    </>
   )
 }
 

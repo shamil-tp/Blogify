@@ -30,7 +30,7 @@ export default function StartPage() {
       className="
         min-h-screen relative overflow-hidden transition-colors duration-500
         bg-slate-50 text-slate-800 font-['Inter',_sans-serif]
-        dark:bg-black dark:text-gray-400
+        dark:bg-black dark:text-black
       "
     >
       <style>
@@ -73,7 +73,7 @@ export default function StartPage() {
               /* LIGHT MODE: White Card */
               
               /* DARK MODE: Gray Card */
-               bg-slate-200 dark:bg-gray-800
+               bg-slate-200 dark:bg-gray-300
             "
           >
             <h1 className="font-['Outfit',_sans-serif] text-5xl md:text-6xl font-extrabold mb-8 tracking-tight text-slate-900 dark:text-white">
@@ -102,9 +102,9 @@ export default function StartPage() {
                 bg-slate-900 text-slate-50 
                 hover:bg-black
 
-                /* DARK MODE BUTTON: Gray Background, White Text */
-                dark:bg-gray-600 dark:text-white 
-                dark:hover:bg-gray-700 dark:border dark:border-gray-600
+                /* DARK MODE BUTTON: Gray-300 Background, Black Text */
+                dark:bg-gray-300 
+                dark:bg-gray-400 dark:border dark:border-gray-300 
               "
             >
               Start Writing

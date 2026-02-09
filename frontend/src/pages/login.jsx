@@ -64,14 +64,14 @@ function Login() {
       </style>
 
       <div className="max-w-md w-full mx-6 p-[1px] bg-slate-200 dark:bg-gray-800 rounded-2xl">
-        <div className="bg-slate-200 dark:bg-gray-800 rounded-2xl p-10 py-14 shadow-2xl shadow-slate-200/50 dark:shadow-black/30 text-center">
+        <div className="bg-slate-200 dark:bg-gray-00 rounded-2xl p-10 py-14 shadow-2xl shadow-slate-200/50 dark:shadow-black/30 text-center">
 
-          <h1 className="font-['Outfit',_sans-serif] text-3xl font-bold !text-slate-900 dark:!text-white">
+          <h1 className="font-['Outfit',_sans-serif] text-3xl font-bold !text-slate-900 dark:!text-dark">
             Welcome Back
           </h1>
 
           <p className="text-slate-600 dark:text-gray-400 text-sm mb-12">
-            Continue to <span className="font-semibold text-gray-300">ogDoc</span>
+            Continue to <span className="font-semibold text-gray-500">ogDoc</span>
           </p>
 
           <div className="flex justify-center">

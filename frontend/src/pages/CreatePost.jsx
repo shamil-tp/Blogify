@@ -25,7 +25,7 @@ const ToolbarButton = ({ onClick, children, title }) => (
     <button
         onClick={onClick}
         title={title}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 text-sm font-medium bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-700 dark:!bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:!bg-gray-600"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 text-sm font-medium bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-700 dark:!bg-gray-300 dark:border-gray-400 dark:text-gray-900 dark:hover:!bg-gray-400"
     >
         {children}
     </button>
@@ -252,7 +252,7 @@ const CreatePost = () => {
             </nav>
 
             <div className="max-w-[1400px] mx-auto">
-                <div className="bg-white dark:!bg-gray-800 rounded-2xl shadow-xl border border-slate-200 dark:border-gray-700 transition-colors duration-500 overflow-hidden">
+                <div className="bg-white dark:!bg-gray-300 rounded-2xl shadow-xl border border-slate-200 dark:border-gray-200 transition-colors duration-500 overflow-hidden">
 
                     <div className="p-4 sm:p-8 min-h-[80vh]">
 
@@ -276,9 +276,9 @@ const CreatePost = () => {
                         />
 
                         {/* TOOLBAR */}
-                        <div className="sticky top-0 z-20 bg-white/95 dark:!bg-gray-800/95 backdrop-blur-sm transition-colors duration-500 rounded mb-5 shadow-sm">
+                        <div className="sticky top-0 z-20 bg-white/95 dark:!bg-gray-300/95 backdrop-blur-sm transition-colors duration-500 rounded mb-5 shadow-sm">
                             <ToolbarContainer>
-                                <span className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mr-2 ml-1">Add Content:</span>
+                                <span className="text-xs font-bold text-gray-600 dark:text-gray-600 uppercase tracking-wider mr-2 ml-1">Add Content:</span>
 
                                 <ToolbarButton onClick={addTextWidget} title="Add Text Block">
                                     <ToolbarIcon>text_fields</ToolbarIcon> Text
@@ -304,7 +304,7 @@ const CreatePost = () => {
                         </div>
 
                         {/* GRID EDITOR CANVAS */}
-                        <div className="dark:bg-gray-800">
+                        <div className="dark:bg-gray-300">
                             <GridEditor widgets={widgets} setWidgets={setWidgets} />
                         </div>
 
