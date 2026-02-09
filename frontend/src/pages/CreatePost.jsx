@@ -16,7 +16,7 @@ const initialWidgets = [
 
 
 const ToolbarContainer = ({ children }) => (
-    <div className="flex flex-wrap gap-2 items-center pb-4 mb-4 border-b border-slate-200 dark:border-slate-700/50 transition-colors duration-300">
+    <div className="flex flex-wrap gap-2 items-center pb-4 mb-4 border-b border-slate-200 dark:border-gray-700/50 transition-colors duration-300">
         {children}
     </div>
 )
@@ -25,7 +25,7 @@ const ToolbarButton = ({ onClick, children, title }) => (
     <button
         onClick={onClick}
         title={title}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 text-sm font-medium bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-700 dark:!bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:!bg-slate-700"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 text-sm font-medium bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-700 dark:!bg-gray-300 dark:border-gray-400 dark:text-gray-900 dark:hover:!bg-gray-400"
     >
         {children}
     </button>
@@ -221,7 +221,7 @@ const CreatePost = () => {
     }
 
     return (
-        <div className="min-h-screen py-10 px-4 bg-slate-50 dark:bg-[#0f172a] font-['Inter',_sans-serif]">
+        <div className="min-h-screen py-10 px-4 bg-slate-50 dark:bg-black font-['Inter',_sans-serif]">
             <style>
                 {`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&display=swap');
@@ -230,21 +230,21 @@ const CreatePost = () => {
         `}
             </style>
 
-            <nav className="max-w-6xl mx-auto flex justify-between items-center mb-12">
-                <h2 className="font-['Outfit',_sans-serif] text-xl font-bold tracking-tight text-slate-900 dark:!text-slate-100">
+            <nav className="max-w-6xl mx-auto flex justify-between items-center mb-12 px-4 py-4 rounded-lg">
+                <h2 className="font-['Outfit',_sans-serif] text-2xl font-bold tracking-tight text-slate-900 dark:!text-gray-400">
                     New Story
                 </h2>
 
                 <div className="flex items-center gap-6">
                     <button
                         onClick={() => setIsDark(!isDark)}
-                        className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+                        className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400 dark:text-gray-400 hover:text-slate-900 dark:hover:text-gray-300 transition-colors"
                     >
                         {isDark ? <i className="bi bi-sun h3"></i> : <i className="bi bi-moon h3"></i>}
                     </button>
                     <button
                         onClick={handleSave}
-                        className="px-6 py-2 rounded bg-slate-900 dark:bg-slate-100 text-slate-50 dark:text-slate-900 text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-all active:scale-95"
+                        className="px-6 py-2 rounded bg-slate-900 dark:bg-gray-600 text-slate-50 dark:text-white text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-all active:scale-95"
                     >
                         Publish
                     </button>
@@ -252,7 +252,7 @@ const CreatePost = () => {
             </nav>
 
             <div className="max-w-[1400px] mx-auto">
-                <div className="bg-white dark:!bg-[#1e293b] rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 transition-colors duration-500 overflow-hidden">
+                <div className="bg-white dark:!bg-gray-300 rounded-2xl shadow-xl border border-slate-200 dark:border-gray-200 transition-colors duration-500 overflow-hidden">
 
                     <div className="p-4 sm:p-8 min-h-[80vh]">
 
@@ -272,13 +272,13 @@ const CreatePost = () => {
                                 backgroundColor: "transparent",
                                 transition: "all 0.3s ease",
                             }}
-                            className="w-full font-['Outfit',_sans-serif] text-[#ffffffff] text-2xl md:text-4xl font-bold bg-transparent border-none focus:outline-none p-0 text-slate-700 placeholder:text-slate-300 dark:placeholder:text-slate-600 dark:text-slate-500"
+                            className="w-full font-['Outfit',_sans-serif] text-[#ffffffff] text-2xl md:text-4xl font-bold bg-transparent border-none focus:outline-none p-0 text-slate-700 placeholder:text-slate-300 dark:placeholder:text-gray-400 dark:text-gray-400"
                         />
 
                         {/* TOOLBAR */}
-                        <div className="sticky top-0 z-20 bg-white/95 dark:!bg-[#1e293b]/95 backdrop-blur-sm transition-colors duration-500 rounded mb-5 shadow-sm">
+                        <div className="sticky top-0 z-20 bg-white/95 dark:!bg-gray-300/95 backdrop-blur-sm transition-colors duration-500 rounded mb-5 shadow-sm">
                             <ToolbarContainer>
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2 ml-1">Add Content:</span>
+                                <span className="text-xs font-bold text-gray-600 dark:text-gray-600 uppercase tracking-wider mr-2 ml-1">Add Content:</span>
 
                                 <ToolbarButton onClick={addTextWidget} title="Add Text Block">
                                     <ToolbarIcon>text_fields</ToolbarIcon> Text
@@ -304,7 +304,9 @@ const CreatePost = () => {
                         </div>
 
                         {/* GRID EDITOR CANVAS */}
-                        <GridEditor widgets={widgets} setWidgets={setWidgets} />
+                        <div className="dark:bg-gray-300">
+                            <GridEditor widgets={widgets} setWidgets={setWidgets} />
+                        </div>
 
                     </div>
                 </div>

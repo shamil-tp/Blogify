@@ -113,13 +113,13 @@ const GridEditor = ({ widgets, setWidgets, readOnly = false }) => {
                             minW: 2,
                             minH: 2
                         }}
-                        className="relative group border border-transparent hover:border-slate-200 dark:hover:border-slate-700 rounded-lg transition-colors flex flex-col"
+                        className="relative group border border-transparent hover:border-slate-200 dark:hover:border-gray-500 rounded-lg transition-colors flex flex-col"
                     >
 
                         {!readOnly && (
                             <div className="absolute top-0 left-0 w-full h-6 z-50 opacity-0 group-hover:opacity-100 transition-opacity flex justify-between items-start px-1 pt-1 pointer-events-none">
                                 {/* DRAG HANDLE */}
-                                <div className="grid-drag-handle cursor-grab active:cursor-grabbing bg-slate-100 dark:bg-slate-600 text-slate-400 dark:text-slate-200 rounded px-2 shadow-sm pointer-events-auto hover:bg-slate-200 dark:hover:bg-slate-500">
+                                <div className="grid-drag-handle cursor-grab active:cursor-grabbing bg-gray-200 dark:bg-gray-400 text-gray-600 dark:text-gray-800 rounded px-2 shadow-sm pointer-events-auto hover:bg-gray-300 dark:hover:bg-gray-500">
                                     <span className="material-icons-outlined text-sm">drag_indicator</span>
                                 </div>
                                 {/* DELETE BUTTON */}
@@ -129,7 +129,7 @@ const GridEditor = ({ widgets, setWidgets, readOnly = false }) => {
                                         e.stopPropagation();
                                         removeWidget(widget.id);
                                     }}
-                                    className="p-0.5 bg-white text-red-500 rounded shadow-md hover:bg-red-50 dark:bg-slate-700 pointer-events-auto"
+                                    className="p-0.5 bg-white text-red-500 rounded shadow-md hover:bg-red-50 dark:bg-gray-400 pointer-events-auto"
                                     title="Remove Item"
                                 >
                                     <span className="material-icons-outlined text-sm">close</span>

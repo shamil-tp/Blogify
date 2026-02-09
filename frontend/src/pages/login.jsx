@@ -51,7 +51,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-300 dark:bg-[#0f172a] transition-colors duration-500 font-['Inter',_sans-serif]">
+    <div className="min-h-screen flex items-center justify-center bg-slate-300 dark:bg-black transition-colors duration-500 font-['Inter',_sans-serif]">
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Outfit:wght@700;800&display=swap');
@@ -63,15 +63,15 @@ function Login() {
         `}
       </style>
 
-      <div className="max-w-md w-full mx-6 p-[1px] bg-slate-200 dark:bg-slate-800 rounded-2xl">
-        <div className="bg-slate-200 dark:bg-slate-800 rounded-2xl p-10 py-14 shadow-2xl shadow-slate-200/50 dark:shadow-none text-center">
+      <div className="max-w-md w-full mx-6 p-[1px] bg-slate-200 dark:bg-gray-800 rounded-2xl">
+        <div className="bg-slate-200 dark:bg-gray-00 rounded-2xl p-10 py-14 shadow-2xl shadow-slate-200/50 dark:shadow-black/30 text-center">
 
-          <h1 className="font-['Outfit',_sans-serif] text-3xl font-bold !text-slate-900 dark:!text-slate-300">
+          <h1 className="font-['Outfit',_sans-serif] text-3xl font-bold !text-slate-900 dark:!text-dark">
             Welcome Back
           </h1>
 
-          <p className="text-slate-600 dark:text-slate-400 text-sm mb-12">
-            Continue to <span className="font-semibold text-slate-400">ogDoc</span>
+          <p className="text-slate-600 dark:text-gray-400 text-sm mb-12">
+            Continue to <span className="font-semibold text-gray-500">ogDoc</span>
           </p>
 
           <div className="flex justify-center">
@@ -81,10 +81,10 @@ function Login() {
             ></div>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-700/50">
+          <div className="mt-12 pt-8 border-t border-slate-100 dark:border-gray-700/50">
             <button
               onClick={() => navigate("/")}
-              className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
             >
               Back to Start
             </button>
