@@ -1,28 +1,30 @@
-# Blogify 📝
+# OG Docs 📝
 
-**A modern, collaborative blogging platform built for speed, security, and developer-centric content control.**
+**A modern, real-time collaborative documentation platform built for speed, security, and developer-centric content control.**
 
 ## About The Project
 
-**Blogify** is a full-stack web application designed to streamline the way developers write and share articles. The project focuses on structured content delivery, moving away from standard plain-text storage to a robust, custom-tailored data architecture.
+**OG Docs** is a full-stack web application designed to streamline the way teams and developers write, edit, and share documentation together. The platform emphasizes structured content delivery and real-time collaboration, moving beyond traditional plain-text storage toward a robust, custom-tailored data architecture.
 
-Built as a high-performance **MERN** application, Blogify provides a seamless writing experience while giving authors granular control over their content's metadata and presentation.
+Built as a high-performance **MERN** application, OG Docs enables multiple collaborators to work simultaneously in a shared workspace, with changes reflected instantly for everyone—ensuring smooth, efficient, and transparent collaboration.
 
 ---
 
 ## 🚀 Key Features
 
-* **Custom Slate.js Engine:** Uses a custom-built implementation to structure content into JSON format, ensuring consistent styling and portability.
+* **Real-Time Collaborative Workspace:** A dedicated editing area where multiple collaborators can make changes simultaneously, with updates reflected in real time.
+* **Custom Slate.js Engine:** A custom-built implementation that structures content into JSON format for consistent styling and long-term portability.
 * **Modern UI/UX:** A clean, responsive interface built with **React 19**, **Tailwind CSS 4.0**, and **CoreUI** components.
-* **Secure Authentication:** Integrated **Google OAuth** for quick and secure user access.
+* **Secure Authentication:** Integrated **Google OAuth** for fast and secure user access.
 * **Developer-Friendly Build:** Optimized with **Vite** for near-instant hot module replacement (HMR).
-* **Robust Security:** Hardened backend using **Helmet**, **HPP**, **Rate Limiting**, and **Zod** for schema validation.
+* **Robust Security:** Hardened backend using **Helmet**, **HPP**, **Rate Limiting**, and **Zod** for strict schema validation.
 
 ---
 
 ## 🛠 The Tech Stack
 
 ### Frontend
+
 * **Library:** React 19
 * **Styling:** Tailwind CSS 4.0 & CoreUI
 * **Editor:** Slate.js (Custom JSON Content Engine)
@@ -30,12 +32,14 @@ Built as a high-performance **MERN** application, Blogify provides a seamless wr
 * **Build Tool:** Vite
 
 ### Backend
+
 * **Runtime:** Node.js
 * **Framework:** Express.js (v5)
 * **Authentication:** JWT & Google Auth Library
 * **Validation:** Zod
 
 ### Database
+
 * **Database:** MongoDB
 * **ODM:** Mongoose
 
@@ -43,51 +47,56 @@ Built as a high-performance **MERN** application, Blogify provides a seamless wr
 
 ## ⚙️ How It Works
 
-The core logic of Blogify revolves around a structured data pipeline:
+The core logic of OG Docs revolves around a structured, collaborative data pipeline:
 
-1.  **The Input:** Authors use a custom editor powered by **Slate.js**. Instead of generating messy HTML, it outputs a clean **JSON tree** representing the document structure.
-2.  **The Storage:** This JSON object is validated via **Zod** and stored in **MongoDB** through **Mongoose** models.
-3.  **The Rendering:** On the frontend, our custom engine traverses the JSON tree and dynamically "paints" the content using Tailwind-styled React components.
-
-
+1. **The Input:** Contributors write using a custom editor powered by **Slate.js**. Instead of generating raw HTML, the editor produces a clean **JSON tree** representing the document structure.
+2. **The Collaboration Layer:** Multiple users can edit the same document simultaneously, with real-time updates synchronized across all active sessions.
+3. **The Storage:** The JSON structure is validated using **Zod** and securely stored in **MongoDB** via **Mongoose** models.
+4. **The Rendering:** On the frontend, a custom rendering engine traverses the JSON tree and dynamically paints the content using Tailwind-styled React components.
 
 ---
 
 ## 📦 Installation & Setup
 
-Follow these steps to get a copy of Blogify running locally.
+Follow these steps to run OG Docs locally.
 
 ### Prerequisites
+
 * [Node.js](https://nodejs.org/) (Latest LTS)
-* [MongoDB](https://www.mongodb.com/) account or local instance.
+* [MongoDB](https://www.mongodb.com/) account or local instance
 
 ### Steps
 
-1.  **Clone the Repository**
-    ```bash
-    git clone [https://github.com/shamil-tp/Blogify.git](https://github.com/shamil-tp/Blogify.git)
-    cd blogify
-    ```
+1. **Clone the Repository**
 
-2.  **Setup Backend**
-    ```bash
-    cd backend
-    npm install
-    ```
-    Create a `.env` file in the `backend` folder and add your `MONGODB_URI`, `JWT_SECRET`, and `PORT`.
+   ```bash
+   git clone https://github.com/shamil-tp/Blogify.git
+   cd blogify
+   ```
 
-3.  **Setup Frontend**
-    ```bash
-    cd ../frontend
-    npm install
-    ```
+2. **Setup Backend**
 
-4.  **Run Development Servers**
-    * **Backend:** `npm run test` (uses nodemon)
-    * **Frontend:** `npm run dev` (uses vite)
+   ```bash
+   cd backend
+   npm install
+   ```
 
-5.  **View the App**
-    Open `http://localhost:5173` for the frontend.
+   Create a `.env` file in the `backend` folder and add your `MONGODB_URI`, `JWT_SECRET`, and `PORT`.
+
+3. **Setup Frontend**
+
+   ```bash
+   cd ../frontend
+   npm install
+   ```
+
+4. **Run Development Servers**
+
+   * **Backend:** `npm run test` (nodemon)
+   * **Frontend:** `npm run dev` (Vite)
+
+5. **View the App**
+   Open `http://localhost:5173` in your browser.
 
 ---
 
@@ -95,6 +104,10 @@ Follow these steps to get a copy of Blogify running locally.
 
 This project was collaboratively designed and developed by:
 
-* **Shamil** - [GitHub](https://github.com/shamil-tp)
-* **Sinan** - [GitHub](https://github.com/sinanrahman/)
-* **Ranfees** - [GitHub](https://github.com/Ranfees)
+* **Sinan** – [GitHub](https://github.com/sinanrahman/)
+* **Hana** – [GitHub](https://github.com/Hana-Haris3)
+* **Salih** – [GitHub](https://github.com/salih85)
+
+---
+
+OG Docs is built with collaboration at its core—designed to help teams write, iterate, and ship documentation together, faster and cleaner.
