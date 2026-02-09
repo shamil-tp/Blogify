@@ -124,7 +124,7 @@ export default function HomeFeed() {
       {/* --- MINIMAL NAVIGATION --- */}
       <nav className="max-w-5xl mx-auto px-6 py-8 flex justify-between items-center">
         <h2 className="font-['Outfit',_sans-serif] text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-          Blogify
+          ogDoc
         </h2>
         <div className="flex items-center gap-6">
           <Link to="/create" className="px-5 py-2 rounded-lg bg-slate-900 dark:bg-slate-100 text-slate-50 dark:text-slate-900 text-xs uppercase tracking-widest font-bold hover:opacity-80 transition-all active:scale-95">
@@ -232,6 +232,6 @@ export default function HomeFeed() {
 
       <footer className="max-w-5xl mx-auto px-6 py-20 text-center">
         <p className="text-[10px] uppercase tracking-widest text-slate-400 border-t border-slate-200 dark:border-slate-800 pt-8 inline-block px-10">
-          &copy; 2026 Blogify Engine</p></footer></div>
+          &copy; 2026 ogDoc Engine</p></footer></div>
   );
 }

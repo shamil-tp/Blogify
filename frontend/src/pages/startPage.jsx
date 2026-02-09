@@ -79,13 +79,12 @@ export default function StartPage() {
             <h1 className="font-['Outfit',_sans-serif] text-5xl md:text-6xl font-extrabold mb-8 tracking-tight text-slate-900 dark:text-slate-100">
               Welcome to{" "}
               <span className="text-slate-400 dark:text-slate-500">
-                Blogify
+                ogDoc
               </span>
             </h1>
 
             <p className="text-lg md:text-xl max-w-lg mx-auto mb-12 leading-relaxed text-slate-600 dark:text-slate-400">
-              A minimalist space to document your journey, 
-              explore new perspectives, and share stories.
+              A dedicated workspace where multiple collaborators can make changes simultaneously, with updates reflected in real time to ensure smooth and efficient collaboration.
             </p>
 
             <button
