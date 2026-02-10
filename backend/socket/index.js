@@ -55,6 +55,9 @@ const initSocket = (server) => {
 
     socket.on("doc:join", async (blogId) => joinDoc(io, socket, blogId));
     socket.on("doc:update", async (data) => syncUpdate(io, socket, data.blogId, data.update));
+    socket.on("doc:awareness", ({ blogId, awareness }) => {
+      socket.to(blogId).emit("doc:awareness", awareness);
+    });
     socket.on("disconnect", () => disconnect(io, socket));
   });
 };
