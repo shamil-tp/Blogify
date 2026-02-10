@@ -56,7 +56,7 @@ const blogSchema = new mongoose.Schema(
       default: []
     },
 
-    // 🔥 Yjs snapshot for collaboration
+    //  Yjs snapshot for collaboration
     collabSnapshot: {
       type: Buffer, // store encoded Yjs state
       default: null
