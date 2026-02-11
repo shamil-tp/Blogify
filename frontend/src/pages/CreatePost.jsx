@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react' 
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from "react-router-dom";
 import api from '../api/axios'
 import axios from 'axios'
@@ -42,6 +42,8 @@ const ToolbarIcon = ({ children }) => (
 // --- MAIN COMPONENT ---
 const CreatePost = () => {
     const { id } = useParams();
+    const isCreateMode = !id;
+    const [docId, setDocId] = useState(id || null);
     const navigate = useNavigate();
     const isEditMode = Boolean(id);
     const [loading, setLoading] = useState(isEditMode);
@@ -113,11 +115,40 @@ const CreatePost = () => {
     }, [id, isEditMode]);
 
 
+    useEffect(() => {
+        if (!isCreateMode || docId) return   // 🔴 IMPORTANT
+
+        const createDraft = async () => {
+            const res = await api.post('/api/blog/create-draft')
+            const newId = res.data.blog._id
+
+            setDocId(newId)
+            navigate(`/edit/${newId}`, { replace: true })
+        }
+
+        createDraft()
+    }, [isCreateMode, docId])
+
+    const saveDraft = async () => {
+        if (!docId) return
+        await api.post(`/api/blog/updateblog/${docId}`, {
+            title,
+            content: widgets
+        })
+    }
+
+    useEffect(() => {
+        if (!isCreateMode) return
+
+        const timer = setTimeout(saveDraft, 2000)
+        return () => clearTimeout(timer)
+    }, [widgets, title, isCreateMode])
+
     const addTextWidget = () => {
         const newWidget = {
             id: uuidv4(),
             type: 'text',
-            content: '', 
+            content: '',
             layout: { x: 0, y: Infinity, w: 12, h: 4 }
         };
         setWidgets([...widgets, newWidget]);
@@ -178,6 +209,7 @@ const CreatePost = () => {
     };
 
 
+
     const handleSave = async () => {
         if (!title.trim()) {
             alert("Please enter a title for your post.");
@@ -200,13 +232,10 @@ const CreatePost = () => {
                 content: sanitizedWidgets,
             };
 
-            if (isEditMode) {
-                await api.post(`/api/blog/updateblog/${id}`, payload);
-                alert("Blog updated");
-            } else {
-                await api.post("/api/blog/postblog", payload);
-                alert("Blog published");
-            }
+            await api.post(`/api/blog/updateblog/${docId}`, {
+                ...payload,
+                published: true
+            });
             navigate("/home");
         } catch (error) {
             console.error(error);
@@ -244,14 +273,20 @@ const CreatePost = () => {
                     >
                         {isDark ? <i className="bi bi-sun h3"></i> : <i className="bi bi-moon h3"></i>}
                     </button>
-                    {isEditMode && (
-                        <button
-                            onClick={() => setShareOpen(true)}
-                            className="px-4 py-2 rounded bg-blue-600 text-white text-xs uppercase tracking-widest font-bold hover:bg-blue-700 transition-all active:scale-95 flex items-center gap-2"
-                        >
-                            <i className="bi bi-share"></i> Share
-                        </button>
-                    )}
+
+                    <button
+                        disabled={!docId}
+                        onClick={() => setShareOpen(true)}
+                        className={`px-4 py-2 rounded text-xs uppercase tracking-widest font-bold
+    flex items-center gap-2 transition-all
+    ${docId
+                                ? "bg-blue-600 hover:bg-blue-700 text-white"
+                                : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                            }`}
+                    >
+                        Share
+                    </button>
+
                     <button
                         onClick={handleSave}
                         className="px-6 py-2 rounded bg-slate-900 dark:bg-gray-600 text-slate-50 dark:text-white text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-all active:scale-95"
@@ -322,10 +357,10 @@ const CreatePost = () => {
                 </div>
             </div>
 
-            <ShareModal 
-                open={shareOpen} 
-                onClose={() => setShareOpen(false)} 
-                docId={id || 'new-doc'}
+            <ShareModal
+                open={shareOpen}
+                onClose={() => setShareOpen(false)}
+                docId={docId}
             />
         </div>
     )

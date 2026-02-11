@@ -72,7 +72,10 @@ exports.getUserBlogs = async (req, res) => {
       return res.status(401).json({ message: 'user not found' })
     }
 
-    const userBlogs = await Blog.find({ author: userId }).populate('author', 'name')
+    const userBlogs = await Blog.find({
+  author: userId,
+  published: true
+})
 
     if (!userBlogs) {
       return res.status(401).json({ message: "no blogs found" })
@@ -115,38 +118,62 @@ exports.deleteUserPost = async (req, res) => {
   }
 }
 
+// exports.getBlogById = async (req, res) => {
+//   try {
+//     let blogId = req.params.postId
+//     const blog = await Blog.findOne({ _id: blogId })
+
+//     if (!blog) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Blog not found"
+//       })
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       blog
+//     })
+
+//   } catch (e) {
+//     console.log(e)
+//     return res.status(500).json({ message: 'error from backend', error: e })
+//   }
+// }
+
 exports.getBlogById = async (req, res) => {
   try {
-    let blogId = req.params.postId
-    const blog = await Blog.findOne({ _id: blogId })
+    const blogId = req.params.postId;
 
-    if (!blog) {
-      return res.status(404).json({
-        success: false,
-        message: "Blog not found"
-      })
+    if (!blogId || blogId === "null") {
+      return res.status(400).json({ message: "Invalid blog id" });
     }
 
-    res.status(200).json({
-      success: true,
-      blog
-    })
+    const blog = await Blog.findById(blogId);
 
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    res.json({ success: true, blog });
   } catch (e) {
-    console.log(e)
-    return res.status(500).json({ message: 'error from backend', error: e })
+    res.status(500).json({ message: "error from backend", error: e });
   }
-}
+};
 
 exports.updateBlog = async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, published } = req.body;
     const blogId = req.params.postId;
     const userId = req.user._id;
 
     const blog = await Blog.findOneAndUpdate(
       { _id: blogId, author: userId },
-      { title, content },
+      {
+        title,
+        content,
+        published: published ?? false 
+      },
       { new: true }
     );
 
@@ -159,3 +186,16 @@ exports.updateBlog = async (req, res) => {
     res.status(500).json({ message: "Update failed", error: e });
   }
 };
+
+
+exports.createDraft = async (req, res) => {
+  const blog = await Blog.create({
+    author: req.user._id,
+    title: '',
+    published: false,
+    slug: slugify(`draft-${Date.now()}`, { lower: true }),
+    content: []
+  })
+
+  res.json({ blog })
+}
