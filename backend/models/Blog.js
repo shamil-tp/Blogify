@@ -41,10 +41,11 @@ const blogSchema = new mongoose.Schema(
 
     title: {
       type: String,
-      required: true,
-      trim: true
+      trim: true,
+      required: function () {
+        return this.published === true
+      }
     },
-
     slug: {
       type: String,
       required: true,
@@ -55,8 +56,12 @@ const blogSchema = new mongoose.Schema(
       type: Array,
       default: []
     },
+    published: {
+      type: Boolean,
+      default: false
+    },
 
-    // 🔥 Yjs snapshot for collaboration
+    //  Yjs snapshot for collaboration
     collabSnapshot: {
       type: Buffer, // store encoded Yjs state
       default: null

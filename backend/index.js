@@ -12,6 +12,9 @@ const PORT = process.env.PORT || 3000;
 const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
 const hpp = require('hpp')
+const http = require("http")
+// const app = require("./app");
+const initSocket = require("./socket");
 
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, 
@@ -41,7 +44,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api", blogRoutes);
 
 if (require.main === module) {
-  app.listen(PORT);
-}
 
+const server = http.createServer(app);
+initSocket(server);
+
+server.listen(PORT, () => console.log(`Server running on ${PORT}`));
+}
 module.exports = app;
