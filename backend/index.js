@@ -43,10 +43,11 @@ app.use(
 				"https://ogdoc-1.onrender.com",
 			];
 
-			// Check if the origin matches any allowed origin (ignoring trailing slashes) or the Render regex
+			// Check if the origin matches any allowed origin (ignoring trailing slashes), Render regex, or ngrok
 			const isAllowed = !origin ||
 				allowedOrigins.some(ao => ao && ao.replace(/\/$/, '') === origin.replace(/\/$/, '')) ||
-				/^https:\/\/.*\.onrender\.com$/.test(origin);
+				/^https:\/\/.*\.onrender\.com$/.test(origin) ||
+				/\.ngrok-free\.(app|dev)$/.test(origin);
 
 			if (isAllowed) {
 				callback(null, true);

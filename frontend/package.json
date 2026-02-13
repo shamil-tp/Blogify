@@ -14,6 +14,7 @@
     "@coreui/icons": "^3.0.1",
     "@coreui/icons-react": "^2.3.0",
     "@coreui/react": "^5.9.2",
+    "@ngrok/ngrok": "^1.7.0",
     "@react-oauth/google": "^0.13.4",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.13.2",

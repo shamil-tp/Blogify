@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 let socket = null;
 
 // Use explicit port 5001 or environment variable
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://192.168.29.93:5001";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://192.168.29.93:5005";
 
 export const initSocket = (docId) => {
   if (socket) return socket;

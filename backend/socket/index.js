@@ -12,9 +12,6 @@ const initSocket = (server) => {
         "http://localhost:5174",
         "http://localhost:5175",
         "http://192.168.29.93:5173",
-        "https://og-doc.vercel.app",
-        "https://ogdoc-1.onrender.com",
-        /^https:\/\/.*\.onrender\.com$/
       ],
       credentials: true
     },
