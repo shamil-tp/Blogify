@@ -26,19 +26,35 @@ const limiter = rateLimit({
 
 app.use(limiter)
 
-app.use(helmet())
+app.use(helmet({
+	crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+	crossOriginResourcePolicy: { policy: "cross-origin" }
+}))
 
 app.use(
 	cors({
-		origin: [
-			"http://localhost:5173",
-			"http://localhost:5174",
-			"http://localhost:5175",
-			process.env.FRONTEND_URL,
-			"https://og-doc.vercel.app",
-			"https://ogdoc-1.onrender.com",
-			/^https:\/\/.*\.onrender\.com$/
-		],
+		origin: (origin, callback) => {
+			const allowedOrigins = [
+				"http://localhost:5173",
+				"http://localhost:5174",
+				"http://localhost:5175",
+				process.env.FRONTEND_URL,
+				"https://og-doc.vercel.app",
+				"https://ogdoc-1.onrender.com",
+			];
+
+			// Check if the origin matches any allowed origin (ignoring trailing slashes) or the Render regex
+			const isAllowed = !origin ||
+				allowedOrigins.some(ao => ao && ao.replace(/\/$/, '') === origin.replace(/\/$/, '')) ||
+				/^https:\/\/.*\.onrender\.com$/.test(origin);
+
+			if (isAllowed) {
+				callback(null, true);
+			} else {
+				console.log("CORS blocked origin:", origin);
+				callback(new Error('Not allowed by CORS'));
+			}
+		},
 		credentials: true
 	})
 );
