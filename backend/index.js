@@ -35,8 +35,7 @@ app.use(
 			"http://localhost:5174",
 			"http://localhost:5175",
 			process.env.FRONTEND_URL,
-			"https://ogdoc-1.onrender.com",
-			/^https:\/\/.*\.onrender\.com$/  // Allow all Render subdomains
+			"https://og-doc.vercel.app/",
 		],
 		credentials: true
 	})
