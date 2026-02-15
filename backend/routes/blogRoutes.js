@@ -6,10 +6,10 @@ const {
     getBlog,
     getUserBlogs,
     deleteUserPost,
-    getBlogById,
     updateBlog,
     createDraft,
-    shareBlog
+    shareBlog,
+    removeCollaborator
 } = require("../controllers/blogController");
 
 const router = express.Router();
@@ -23,6 +23,7 @@ router.get("/ping", (req, res) => res.json({ message: "Blog routes active" }));
 
 // MAIN SHARE ROUTE
 router.post("/share-post/:postId", protect, shareBlog);
+router.post("/remove-collaborator/:postId", protect, removeCollaborator);
 
 // Other Routes
 router.post("/create-draft", protect, createDraft);

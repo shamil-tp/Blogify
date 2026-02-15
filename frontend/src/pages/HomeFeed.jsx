@@ -42,8 +42,22 @@ export default function HomeFeed() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [postToDeleteId, setPostToDeleteId] = useState(null);
   const [postToDeleteTitle, setPostToDeleteTitle] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
 
   const navigate = useNavigate();
+
+  const startNewStory = async () => {
+    if (isCreating) return;
+    setIsCreating(true);
+    try {
+      const res = await api.post('/api/blog/create-draft');
+      const newId = res.data.blog._id;
+      navigate(`/create/${newId}`);
+    } catch (e) {
+      console.error("Error creating draft:", e);
+      setIsCreating(false);
+    }
+  };
 
   const editPost = (postId) => {
     navigate(`/edit/${postId}`);
@@ -169,18 +183,11 @@ export default function HomeFeed() {
 
           <div className="flex items-center gap-6">
             <button
-              onClick={async () => {
-                try {
-                  const res = await api.post('/api/blog/create-draft');
-                  const newId = res.data.blog._id;
-                  navigate(`/create/${newId}`);
-                } catch (e) {
-                  console.error("Error creating draft:", e);
-                }
-              }}
-              className="px-6 py-2.5 rounded-full bg-slate-900 dark:bg-blue-600 text-white text-xs uppercase tracking-widest font-black hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-500/20 dark:shadow-blue-600/20"
+              onClick={startNewStory}
+              disabled={isCreating}
+              className={`px-6 py-2.5 rounded-full bg-slate-900 dark:bg-blue-600 text-white text-xs uppercase tracking-widest font-black hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-500/20 dark:shadow-blue-600/20 ${isCreating ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              Start Writing
+              {isCreating ? 'Creating...' : 'Start Writing'}
             </button>
             <button
               onClick={() => setIsDark(!isDark)}
@@ -219,22 +226,17 @@ export default function HomeFeed() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* ADD NEW POST PLACEHOLDER CARD - NOW FIRST */}
           <button
-            onClick={async () => {
-              try {
-                const res = await api.post('/api/blog/create-draft');
-                const newId = res.data.blog._id;
-                navigate(`/create/${newId}`);
-              } catch (e) {
-                console.error("Error creating draft:", e);
-              }
-            }}
-            className="group relative h-full glass-card p-6 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 flex flex-col items-center justify-center gap-4 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 min-h-[300px]"
+            onClick={startNewStory}
+            disabled={isCreating}
+            className={`group relative h-full glass-card p-6 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-white/10 flex flex-col items-center justify-center gap-4 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300 min-h-[300px] ${isCreating ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <div className="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-blue-900/10 flex items-center justify-center text-slate-300 dark:text-blue-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 group-hover:text-blue-500 transition-all">
-              <i className="bi bi-plus-lg text-3xl"></i>
+              <i className={`bi ${isCreating ? 'bi-arrow-repeat animate-spin' : 'bi-plus-lg'} text-3xl`}></i>
             </div>
             <div className="text-center">
-              <span className="block text-sm font-bold text-slate-900 dark:text-slate-100">Create New Story</span>
+              <span className="block text-sm font-bold text-slate-900 dark:text-slate-100">
+                {isCreating ? 'Working...' : 'Create New Story'}
+              </span>
               <span className="text-[11px] text-slate-400 dark:text-slate-500">Share your latest discovery</span>
             </div>
           </button>

@@ -92,6 +92,7 @@ const CreatePost = () => {
 
     const [widgets, setWidgets] = useState(initialWidgets)
     const [title, setTitle] = useState('')
+    const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false)
     const [ydoc, setYdoc] = useState(null);
     const [awareness, setAwareness] = useState(null);
@@ -119,6 +120,30 @@ const CreatePost = () => {
     }, [isDark]);
 
     const fileInputRef = useRef(null);
+
+    // --- SYNC TITLE ACROSS COLLABORATORS ---
+    useEffect(() => {
+        if (!ydoc) return;
+        const yTitle = ydoc.getText('title');
+
+        const observer = () => {
+            const currentYTitle = yTitle.toString();
+            // Using functional update to avoid stale title in closure
+            setTitle(prev => {
+                if (prev !== currentYTitle) return currentYTitle;
+                return prev;
+            });
+        };
+
+        yTitle.observe(observer);
+        // Initial sync if title is already in ydoc
+        const initialTitle = yTitle.toString();
+        if (initialTitle && initialTitle !== title) {
+            setTitle(initialTitle);
+        }
+
+        return () => yTitle.unobserve(observer);
+    }, [ydoc]);
 
     useEffect(() => {
         if (!isEditMode) return;
@@ -471,15 +496,19 @@ const CreatePost = () => {
 
 
     const handleSave = async () => {
+        if (isSaving) return;
+        setIsSaving(true);
         console.log('🚀 Publish button clicked');
 
         if (!title.trim()) {
             alert("Please enter a title for your post.");
+            setIsSaving(false);
             return;
         }
 
         if (!docId) {
             alert("Document ID is missing. Please try refreshing the page.");
+            setIsSaving(false);
             return;
         }
 
@@ -508,28 +537,18 @@ const CreatePost = () => {
                 content: sanitizedWidgets,
             };
 
-            console.log('📤 Sending to server...', { docId, title, widgetCount: sanitizedWidgets.length });
-
             const response = await api.post(`/api/blog/updateblog/${docId}`, {
                 ...payload,
                 published: true
             });
 
-            console.log('✅ Published successfully!', response.data);
+            console.log('✅ Published successfully!');
             navigate("/home");
         } catch (error) {
             console.error('❌ Publish failed:', error);
-            if (error.response) {
-                console.error('   Response data:', error.response.data);
-                console.error('   Response status:', error.response.status);
-                alert(`Cannot save: ${JSON.stringify(error.response.data)}`);
-            } else if (error.request) {
-                console.error('   No response received:', error.request);
-                alert("Error: No response from server. Is the backend running?");
-            } else {
-                console.error('   Error message:', error.message);
-                alert(`Error saving post: ${error.message}`);
-            }
+            alert("Failed to publish document.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -607,10 +626,11 @@ const CreatePost = () => {
 
                     {canEdit && (
                         <button
+                            disabled={isSaving}
                             onClick={handleSave}
-                            className="px-6 py-2 rounded bg-slate-900 dark:bg-gray-600 text-slate-50 dark:text-white text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-all active:scale-95"
+                            className={`px-6 py-2 rounded bg-slate-900 dark:bg-gray-600 text-slate-50 dark:text-white text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-all active:scale-95 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
-                            Publish
+                            {isSaving ? 'Publishing...' : 'Publish'}
                         </button>
                     )}
                 </div>

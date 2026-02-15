@@ -265,3 +265,30 @@ exports.shareBlog = async (req, res) => {
     res.status(500).json({ message: "Sharing failed", error: e.message });
   }
 };
+
+exports.removeCollaborator = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const blogId = req.params.postId;
+    const userId = req.user._id;
+
+    const blog = await Blog.findById(blogId);
+
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    // Only author can remove collaborators
+    if (blog.author.toString() !== userId.toString()) {
+      return res.status(403).json({ message: "Only the author can remove collaborators" });
+    }
+
+    blog.collaborators = blog.collaborators.filter(c => c.email !== email);
+    await blog.save();
+
+    res.status(200).json({ success: true, message: "Collaborator removed successfully" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Action failed", error: e.message });
+  }
+};

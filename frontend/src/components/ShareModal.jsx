@@ -12,11 +12,35 @@ const ShareModal = ({ open, onClose, docId }) => {
 
   const shareLink = `${window.location.origin}/create/${docId}`;
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  const [collaborators, setCollaborators] = useState([]);
+
+  const isAuthor = React.useMemo(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    return user && collaborators.find(c => c.isAuthor && c.email === user.email);
+  }, [collaborators]);
+
+  const fetchBlogDetails = React.useCallback(async () => {
+    try {
+      const res = await api.get(`/api/blog/${docId}`);
+      if (res.data?.blog) {
+        const blog = res.data.blog;
+        // Transform author and collaborators into a single list for management
+        const list = [
+          { email: 'Author', isAuthor: true, role: 'owner', name: 'Original Author' },
+          ...blog.collaborators.map(c => ({ ...c, isAuthor: false }))
+        ];
+        setCollaborators(list);
+      }
+    } catch (err) {
+      console.error("Error fetching collaborators:", err);
+    }
+  }, [docId]);
+
+  React.useEffect(() => {
+    if (open) {
+      fetchBlogDetails();
+    }
+  }, [open, fetchBlogDetails]);
 
   const handleInvite = async (e) => {
     e.preventDefault();
@@ -26,18 +50,11 @@ const ShareModal = ({ open, onClose, docId }) => {
     setMessage({ text: '', type: '' });
 
     try {
-      const fullUrl = `${api.defaults.baseURL}/api/blog/share-post/${docId}`;
-      console.log('🚀 Calling Share API at:', fullUrl);
-      const response = await api.post(`/api/blog/share-post/${docId}`, { email, role });
-      setMessage({ text: response.data.message || 'Invitation sent!', type: 'success' });
+      await api.post(`/api/blog/share-post/${docId}`, { email, role });
+      setMessage({ text: 'Invitation sent!', type: 'success' });
       setEmail('');
+      fetchBlogDetails(); // Refresh list
     } catch (error) {
-      console.error('Share error details:', {
-        url: error.config?.url,
-        method: error.config?.method,
-        status: error.response?.status,
-        data: error.response?.data
-      });
       setMessage({
         text: error.response?.data?.message || 'Failed to send invitation',
         type: 'error'
@@ -45,6 +62,21 @@ const ShareModal = ({ open, onClose, docId }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRemove = async (targetEmail) => {
+    try {
+      await api.post(`/api/blog/remove-collaborator/${docId}`, { email: targetEmail });
+      fetchBlogDetails(); // Refresh list
+    } catch (error) {
+      alert("Failed to remove collaborator");
+    }
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -63,7 +95,7 @@ const ShareModal = ({ open, onClose, docId }) => {
         </div>
 
         {/* Invite via Email Section */}
-        <form onSubmit={handleInvite} className="mb-8">
+        <form onSubmit={handleInvite} className="mb-6">
           <label className="text-sm font-semibold text-slate-700 dark:text-gray-300 mb-2 block">
             Invite people
           </label>
@@ -104,6 +136,38 @@ const ShareModal = ({ open, onClose, docId }) => {
             </p>
           )}
         </form>
+
+        {/* PEOPLE WITH ACCESS */}
+        <div className="mb-8">
+          <label className="text-sm font-semibold text-slate-700 dark:text-gray-300 mb-3 block">
+            People with access
+          </label>
+          <div className="space-y-4 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+            {collaborators.map((c, i) => (
+              <div key={i} className="flex items-center justify-between group">
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold ${c.isAuthor ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-600'}`}>
+                    {c.email[0].toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-slate-900 dark:text-white truncate max-w-[150px]">
+                      {c.email}
+                    </p>
+                    <p className="text-[10px] text-slate-500 capitalize">{c.role}</p>
+                  </div>
+                </div>
+                {!c.isAuthor && (
+                  <button
+                    onClick={() => handleRemove(c.email)}
+                    className="text-[10px] font-bold text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:underline"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="h-px bg-slate-100 dark:bg-gray-800 mb-8" />
 
