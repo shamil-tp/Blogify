@@ -1,45 +1,35 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require("resend");
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async (to, subject, text, html) => {
-
-    console.log("USER:", process.env.EMAIL_USER);
-    console.log("PASS LENGTH:", process.env.EMAIL_PASS?.length);
-
-    console.log("Email Service Attempt:", {
-        user: process.env.EMAIL_USER ? "DETECTED" : "MISSING",
-        pass: process.env.EMAIL_PASS ? "DETECTED" : "MISSING"
+    console.log("Resend Service Attempt:", {
+        apiKey: process.env.RESEND_API_KEY ? "DETECTED" : "MISSING",
+        to
     });
 
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        throw new Error("Missing EMAIL_USER or EMAIL_PASS environment variables");
+    if (!process.env.RESEND_API_KEY) {
+        throw new Error("Missing RESEND_API_KEY environment variable");
     }
 
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-        },
-        tls: {
-            rejectUnauthorized: false, // 👈 ADD THIS
-        },
-    });
-
-
-
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to,
-        subject,
-        text,
-        html,
-    };
-
     try {
-        await transporter.sendMail(mailOptions);
-        console.log(`Email sent to ${to}`);
+        const { data, error } = await resend.emails.send({
+            from: "onboarding@resend.dev",
+            to,
+            subject,
+            text,
+            html,
+        });
+
+        if (error) {
+            console.error("Resend API Error:", error);
+            throw new Error(error.message);
+        }
+
+        console.log("Email sent successfully via Resend:", data.id);
+        return data;
     } catch (error) {
-        console.error('Error sending email:', error);
+        console.error("Resend execution error:", error);
         throw error;
     }
 };
