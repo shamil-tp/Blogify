@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import secureLocalStorage from "react-secure-storage";
 
@@ -25,27 +25,32 @@ function Login() {
     }
   }, [isDark]);
 
+  const googleInitialized = useRef(false);
+
   useEffect(() => {
-    if (!window.google) return;
+    if (!window.google || googleInitialized.current) return;
 
     window.google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: handleCredentialLogin,
+      auto_select: false,
+      use_fedcm_for_prompt: true,
+      ux_mode: 'popup'
     });
 
-    window.google.accounts.id.renderButton(
-      document.getElementById("googleSignInDiv"),
-      {
+    const googleBtn = document.getElementById("googleSignInDiv");
+    if (googleBtn) {
+      window.google.accounts.id.renderButton(googleBtn, {
         theme: isDark ? "filled_black" : "outline",
         size: "large",
         shape: "pill",
         width: "280",
-      }
-    );
+      });
+      googleInitialized.current = true;
+    }
   }, [isDark]);
 
   const handleCredentialLogin = async (response) => {
-    console.log(response)
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/google`, {
         method: "POST",
@@ -54,15 +59,16 @@ function Login() {
         body: JSON.stringify({ token: response.credential }),
       });
 
-      
       const data = await res.json();
+
       if (data.success) {
         secureLocalStorage.setItem("accessToken", data.accessToken);
         secureLocalStorage.setItem("refreshToken", data.refreshToken);
+        localStorage.setItem("user", JSON.stringify(data.user));
         navigate("/home", { replace: true });
       }
     } catch (error) {
-      console.error("Login Failed", error);
+      console.error("Login Failed:", error);
     }
   };
 

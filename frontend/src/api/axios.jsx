@@ -14,10 +14,7 @@ api.interceptors.request.use(
   (config) => {
     const token = secureLocalStorage.getItem("accessToken");
     if (token) {
-      console.log("Axios Interceptor: Attaching Access Token:", token.substring(0, 10) + "...");
       config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.log("Axios Interceptor: No Access Token found in storage.");
     }
     return config;
   },

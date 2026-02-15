@@ -53,9 +53,11 @@ app.use(
 
 // 2. Security Headers (configured to allow cross-origin communication)
 app.use(helmet({
-	crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+	crossOriginOpenerPolicy: false,
 	crossOriginResourcePolicy: { policy: "cross-origin" },
-	contentSecurityPolicy: false, // Disable CSP for dev/testing if it causes issues
+	crossOriginEmbedderPolicy: false,
+	contentSecurityPolicy: false,
+	referrerPolicy: { policy: "strict-origin-when-cross-origin" },
 }));
 
 // 3. Rate Limiting (moved below CORS so preflight OPTIONS requests aren't blocked silently)
@@ -94,7 +96,7 @@ app.get('/', (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api", blogRoutes);
+app.use("/api/blog", blogRoutes);
 
 if (require.main === module) {
 
