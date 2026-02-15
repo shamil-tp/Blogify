@@ -1,6 +1,10 @@
 const nodemailer = require('nodemailer');
 
 const sendEmail = async (to, subject, text, html) => {
+
+    console.log("USER:", process.env.EMAIL_USER);
+    console.log("PASS LENGTH:", process.env.EMAIL_PASS?.length);
+
     console.log("Email Service Attempt:", {
         user: process.env.EMAIL_USER ? "DETECTED" : "MISSING",
         pass: process.env.EMAIL_PASS ? "DETECTED" : "MISSING"
@@ -16,7 +20,11 @@ const sendEmail = async (to, subject, text, html) => {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS,
         },
+        tls: {
+            rejectUnauthorized: false, // 👈 ADD THIS
+        },
     });
+
 
 
     const mailOptions = {
