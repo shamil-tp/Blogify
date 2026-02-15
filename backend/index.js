@@ -46,7 +46,7 @@ app.use(
 
 // 2. Security Headers (configured to allow cross-origin communication)
 app.use(helmet({
-	crossOriginOpenerPolicy: false,
+	crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
 	crossOriginResourcePolicy: { policy: "cross-origin" },
 	crossOriginEmbedderPolicy: false,
 	contentSecurityPolicy: false,

@@ -30,6 +30,7 @@ function Login() {
   useEffect(() => {
     if (!window.google || googleInitialized.current) return;
 
+    console.log("Initializing Google Auth...");
     window.google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: handleCredentialLogin,
@@ -37,6 +38,11 @@ function Login() {
       use_fedcm_for_prompt: true,
       ux_mode: 'popup'
     });
+    googleInitialized.current = true;
+  }, []); // Only runs once on mount
+
+  useEffect(() => {
+    if (!window.google) return;
 
     const googleBtn = document.getElementById("googleSignInDiv");
     if (googleBtn) {
@@ -46,9 +52,8 @@ function Login() {
         shape: "pill",
         width: "280",
       });
-      googleInitialized.current = true;
     }
-  }, [isDark]);
+  }, [isDark, window.google]); // Re-render button when theme changes
 
   const handleCredentialLogin = async (response) => {
     try {
