@@ -96,6 +96,7 @@ const CreatePost = () => {
     const [ydoc, setYdoc] = useState(null);
     const [awareness, setAwareness] = useState(null);
     const [collaborators, setCollaborators] = useState([]);
+    const [canEdit, setCanEdit] = useState(true);
 
     const [yWidgets, setYWidgets] = useState(null);
 
@@ -129,8 +130,18 @@ const CreatePost = () => {
                 const res = await api.get(url);
 
                 if (res.data && res.data.blog) {
-                    setTitle(res.data.blog.title);
-                    const loadedContent = res.data.blog.content;
+                    const blog = res.data.blog;
+                    setTitle(blog.title);
+                    const loadedContent = blog.content;
+
+                    // Check permissions
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (user && blog.author !== user._id) {
+                        const collab = blog.collaborators?.find(c => c.email === user.email);
+                        if (!collab || collab.role === 'view') {
+                            setCanEdit(false);
+                        }
+                    }
 
                     if (Array.isArray(loadedContent) && loadedContent.length > 0) {
                         if (loadedContent[0].layout && loadedContent[0].id) {
@@ -271,7 +282,7 @@ const CreatePost = () => {
             }
         });
 
-        
+
         // Set local awareness state (name/color)
         const userData = JSON.parse(localStorage.getItem('user')) || {};
         awarenessInstance.setLocalStateField('user', {
@@ -563,41 +574,45 @@ const CreatePost = () => {
                         Share
                     </button>
 
-                    <button
-                        disabled={collaborators.length < 2}
-                        onClick={() => {
-                            const otherUsers = collaborators.filter(
-                                c => c.socketId && c.socketId !== socket.id
-                            );
+                    {canEdit && (
+                        <button
+                            disabled={collaborators.length < 2}
+                            onClick={() => {
+                                const otherUsers = collaborators.filter(
+                                    c => c.socketId && c.socketId !== socket.id
+                                );
 
-                            if (otherUsers.length === 0) {
-                                alert("No other collaborators online");
-                                return;
-                            }
+                                if (otherUsers.length === 0) {
+                                    alert("No other collaborators online");
+                                    return;
+                                }
 
 
-                            otherUsers.forEach(user => {
-                                socket.emit("call:invite", {
-                                    blogId: docId,
-                                    to: user.socketId,
+                                otherUsers.forEach(user => {
+                                    socket.emit("call:invite", {
+                                        blogId: docId,
+                                        to: user.socketId,
+                                    });
                                 });
-                            });
 
-                            setOutgoingCall(otherUsers[0]);
-                        }}
-                        className="px-4 py-2 rounded bg-green-600 text-white text-xs uppercase font-bold"
-                    >
-                        📹 Start Call
-                    </button>
+                                setOutgoingCall(otherUsers[0]);
+                            }}
+                            className="px-4 py-2 rounded bg-green-600 text-white text-xs uppercase font-bold"
+                        >
+                            📹 Start Call
+                        </button>
+                    )}
 
 
 
-                    <button
-                        onClick={handleSave}
-                        className="px-6 py-2 rounded bg-slate-900 dark:bg-gray-600 text-slate-50 dark:text-white text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-all active:scale-95"
-                    >
-                        Publish
-                    </button>
+                    {canEdit && (
+                        <button
+                            onClick={handleSave}
+                            className="px-6 py-2 rounded bg-slate-900 dark:bg-gray-600 text-slate-50 dark:text-white text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-all active:scale-95"
+                        >
+                            Publish
+                        </button>
+                    )}
                 </div>
             </nav>
 
@@ -607,10 +622,9 @@ const CreatePost = () => {
                     <div className="p-4 sm:p-8 min-h-[80vh]">
 
                         <input
-                            type="text"
-                            placeholder="Title..."
-                            value={title}
+                            readOnly={!canEdit}
                             onChange={e => {
+                                if (!canEdit) return;
                                 const newTitle = e.target.value;
                                 setTitle(newTitle);
                                 if (ydoc) {
@@ -636,36 +650,38 @@ const CreatePost = () => {
                         />
 
                         {/* TOOLBAR */}
-                        <div className="sticky top-0 z-20 bg-white/95 dark:!bg-gray-300/95 backdrop-blur-sm transition-colors duration-500 rounded mb-5 shadow-sm">
-                            <ToolbarContainer>
-                                <span className="text-xs font-bold text-gray-600 dark:text-gray-600 uppercase tracking-wider mr-2 ml-1">Add Content:</span>
+                        {canEdit && (
+                            <div className="sticky top-0 z-20 bg-white/95 dark:!bg-gray-300/95 backdrop-blur-sm transition-colors duration-500 rounded mb-5 shadow-sm">
+                                <ToolbarContainer>
+                                    <span className="text-xs font-bold text-gray-600 dark:text-gray-600 uppercase tracking-wider mr-2 ml-1">Add Content:</span>
 
-                                <ToolbarButton onClick={addTextWidget} title="Add Text Block">
-                                    <ToolbarIcon>text_fields</ToolbarIcon> Text
-                                </ToolbarButton>
+                                    <ToolbarButton onClick={addTextWidget} title="Add Text Block">
+                                        <ToolbarIcon>text_fields</ToolbarIcon> Text
+                                    </ToolbarButton>
 
-                                <ToolbarButton onClick={triggerImageUpload} title="Add Image">
-                                    <ToolbarIcon>{isUploading ? 'sync' : 'add_photo_alternate'}</ToolbarIcon> Image
-                                </ToolbarButton>
-                                {/* Hidden Input */}
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    ref={fileInputRef}
-                                    onChange={handleImageUpload}
-                                    disabled={isUploading}
-                                />
+                                    <ToolbarButton onClick={triggerImageUpload} title="Add Image">
+                                        <ToolbarIcon>{isUploading ? 'sync' : 'add_photo_alternate'}</ToolbarIcon> Image
+                                    </ToolbarButton>
+                                    {/* Hidden Input */}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        ref={fileInputRef}
+                                        onChange={handleImageUpload}
+                                        disabled={isUploading}
+                                    />
 
-                                <ToolbarButton onClick={addVideoWidget} title="Add Video Embed">
-                                    <ToolbarIcon>smart_display</ToolbarIcon> Video
-                                </ToolbarButton>
-                            </ToolbarContainer>
-                        </div>
+                                    <ToolbarButton onClick={addVideoWidget} title="Add Video Embed">
+                                        <ToolbarIcon>smart_display</ToolbarIcon> Video
+                                    </ToolbarButton>
+                                </ToolbarContainer>
+                            </div>
+                        )}
 
                         {/* GRID EDITOR CANVAS */}
                         <div className="dark:bg-gray-300">
-                            <GridEditor widgets={widgets} setWidgets={updateWidgets} ydoc={ydoc} awareness={awareness} />
+                            <GridEditor widgets={widgets} setWidgets={updateWidgets} ydoc={ydoc} awareness={awareness} readOnly={!canEdit} />
                         </div>
 
                     </div>

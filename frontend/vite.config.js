@@ -20,5 +20,9 @@ export default defineConfig({
     port: 5173,
     strictPort: false,
     allowedHosts: true,
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+    },
   },
 })

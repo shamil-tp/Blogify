@@ -79,7 +79,14 @@ const blogSchema = new mongoose.Schema(
     collabVersion: {
       type: Number,
       default: 1
-    }
+    },
+
+    collaborators: [
+      {
+        email: { type: String, required: true },
+        role: { type: String, enum: ['view', 'edit'], default: 'view' }
+      }
+    ]
   },
   { timestamps: true }
 )

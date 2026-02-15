@@ -55,7 +55,9 @@ app.use(
 app.use(helmet({
 	crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
 	crossOriginResourcePolicy: { policy: "cross-origin" },
-	contentSecurityPolicy: false, // Disable CSP for dev/testing if it causes issues
+	crossOriginEmbedderPolicy: false,
+	contentSecurityPolicy: false,
+	referrerPolicy: { policy: "strict-origin-when-cross-origin" },
 }));
 
 // 3. Rate Limiting (moved below CORS so preflight OPTIONS requests aren't blocked silently)
