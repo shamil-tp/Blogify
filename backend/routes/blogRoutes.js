@@ -14,25 +14,23 @@ const {
 
 const router = express.Router();
 
-// 1. Health Check for Routing (Verify Deployment)
-router.get("/blog/ping", (req, res) => {
-    console.log("Ping route hit!");
-    res.json({ message: "Blog routes active", timestamp: new Date() });
-});
+/**
+ * ALL ROUTES HERE ARE PREFIXED WITH /api/blog (via index.js)
+ */
 
-// 2. Sharing Route (High Priority)
-// Note: This matches /api/blog/share-post/:postId
-router.post("/blog/share-post/:postId", protect, shareBlog);
+// Debugging
+router.get("/ping", (req, res) => res.json({ message: "Blog routes active" }));
 
-// 3. Document Management
-router.post("/blog/create-draft", protect, createDraft);
-router.get("/blog/user-blogs", protect, getUserBlogs);
-router.get("/blog/deleteblog/:postId", protect, deleteUserPost);
-router.post("/blog/updateblog/:postId", protect, updateBlog);
+// MAIN SHARE ROUTE
+router.post("/share-post/:postId", protect, shareBlog);
 
-// 4. Retrieval (Catch-all patterns last)
-router.get("/blog/:postId", getBlogById);
-router.post("/blog/postblog", protect, addBlog);
+// Other Routes
+router.post("/create-draft", protect, createDraft);
+router.get("/user-blogs", protect, getUserBlogs);
+router.get("/deleteblog/:postId", protect, deleteUserPost);
+router.get("/:postId", getBlogById);
+router.post("/updateblog/:postId", protect, updateBlog);
+router.post("/postblog", protect, addBlog);
 router.get("/viewblog/:slug", getBlog);
 
 module.exports = router;

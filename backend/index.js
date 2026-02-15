@@ -96,7 +96,7 @@ app.get('/', (req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api", blogRoutes);
+app.use("/api/blog", blogRoutes);
 
 if (require.main === module) {
 
