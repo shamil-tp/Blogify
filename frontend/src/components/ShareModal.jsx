@@ -174,9 +174,10 @@ const ShareModal = ({ open, onClose, docId, onlineUsers = [], currentSocketId, o
                 {isAuthor && (
                   <button
                     onClick={() => handleRemove(c.email)}
-                    className="text-[10px] font-bold text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:underline"
+                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                    title="Remove Collaborator"
                   >
-                    Remove
+                    <span className="material-icons-outlined text-sm">close</span>
                   </button>
                 )}
               </div>
@@ -201,9 +202,10 @@ const ShareModal = ({ open, onClose, docId, onlineUsers = [], currentSocketId, o
                   {isAuthor && u.socketId !== currentSocketId && ( // Don't kick self
                     <button
                       onClick={() => onKick && onKick(u.socketId)}
-                      className="text-[10px] font-bold text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity hover:underline"
+                      className="p-1.5 text-slate-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all"
+                      title="Kick Visitor"
                     >
-                      Kick
+                      <span className="material-icons-outlined text-sm">close</span>
                     </button>
                   )}
                 </div>
