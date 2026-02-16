@@ -559,80 +559,74 @@ const CreatePost = () => {
         <div className="min-h-screen py-10 px-4 bg-slate-50 dark:bg-black font-['Inter',_sans-serif]">
 
 
-            <nav className="max-w-6xl mx-auto flex justify-between items-center mb-12 px-4 py-4 rounded-lg">
-                <h2 className="font-['Outfit',_sans-serif] text-2xl font-bold tracking-tight text-slate-900 dark:!text-gray-400">
-                    New Story
-                </h2>
+           <nav className="max-w-6xl mx-auto flex flex-col gap-6 mb-4 md:mb-12 px-2 md:px-4">
+        {/* TOP ROW: Branding & Primary Action */}
+        <div className="flex items-center justify-between w-full mt-4 md:mt-0">
+       <h2 className="font-['Outfit',_sans-serif] text-2xl md:!text-[60px] font-bold tracking-tight text-slate-800 dark:text-gray-200 leading-tight">
+    New Story
+</h2>
 
-                <div className="flex items-center gap-6">
-                    {/* Active Collaborators Indicator */}
-                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 bg-slate-100 dark:bg-gray-800 px-3 py-1.5 rounded-full">
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        {collaborators.length} Online
-                    </div>
+            {/* Primary Action - Always prominent */}
+            <button
+                onClick={handleSave}
+                className="px-6 py-2 md:px-8 md:py-2.5 rounded-full bg-blue-600 dark:bg-blue-500 text-white text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-black active:scale-95 shadow-lg shadow-blue-500/25 border-[0.5px] border-white/10 flex items-center gap-2 transition-all"
+            >
+                <i className="bi bi-send-fill text-[12px]"></i>
+                <span>Publish</span>
+            </button>
+        </div>
 
-                    <button
-                        onClick={() => setIsDark(!isDark)}
-                        className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400 dark:text-gray-400 hover:text-slate-900 dark:hover:text-gray-300 transition-colors"
-                    >
-                        {isDark ? <i className="bi bi-sun h3"></i> : <i className="bi bi-moon h3"></i>}
-                    </button>
+        {/* SECONDARY TOOLS: Repositioned for Mobile */}
+        {/* On mobile: Moves just above the container. On Desktop: Stays right-aligned */}
+        <div className="flex items-center justify-end gap-2 overflow-x-auto no-scrollbar py-1">
+            
+            {/* Active Collaborators */}
+            <div className="flex items-center gap-2 text-[10px] font-black   backdrop-blur-xl px-3 py-2 rounded-full  shadow-sm shrink-0">
+                <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+                </span>
+                <span className="text-slate-500 dark:text-slate-400">
+                    {collaborators.length} <span className="hidden lg:inline">Online</span>
+                </span>
+            </div>
 
-                    <button
-                        disabled={!docId}
-                        onClick={() => setShareOpen(true)}
-                        className={`px-4 py-2 rounded text-xs uppercase tracking-widest font-bold
-    flex items-center gap-2 transition-all
-    ${docId
-                                ? "bg-blue-600 hover:bg-blue-700 text-white"
-                                : "bg-gray-400 text-gray-200 cursor-not-allowed"
-                            }`}
-                    >
-                        Share
-                    </button>
+            {/* SHARE */}
+            <button
+                disabled={!docId}
+                onClick={() => setShareOpen(true)}
+                className={`h-9 w-9 md:w-auto md:px-4 flex items-center justify-center gap-2 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-xl  transition-all
+                    ${docId 
+                        ? " text-slate-700 dark:text-slate-300 dark:border-white/10 shadow-sm" 
+                        : "opacity-40 cursor-not-allowed"}`}
+            >
+                <i className="bi bi-share-fill"></i>
+                <span className="hidden md:inline">Share</span>
+            </button>
 
-                    {canEdit && (
-                        <button
-                            disabled={collaborators.length < 2}
-                            onClick={() => {
-                                const otherUsers = collaborators.filter(
-                                    c => c.socketId && c.socketId !== socket.id
-                                );
+            {/* CALL */}
+            <button
+                onClick={() => {
+                    const otherUsers = collaborators.filter(c => c.socketId && c.socketId !== socket.id);
+                    if (otherUsers.length === 0) { alert("No one online"); return; }
+                    otherUsers.forEach(user => socket.emit("call:invite", { blogId: docId, to: user.socketId }));
+                    setOutgoingCall(otherUsers[0]);
+                }}
+                className="h-9 w-9 md:w-auto md:px-4 flex items-center justify-center gap-2 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400  backdrop-blur-xl shadow-sm transition-all"
+            >
+                <i className="bi bi-camera-video-fill"></i>
+                <span className="hidden md:inline">Call</span>
+            </button>
 
-                                if (otherUsers.length === 0) {
-                                    alert("No other collaborators online");
-                                    return;
-                                }
-
-
-                                otherUsers.forEach(user => {
-                                    socket.emit("call:invite", {
-                                        blogId: docId,
-                                        to: user.socketId,
-                                    });
-                                });
-
-                                setOutgoingCall(otherUsers[0]);
-                            }}
-                            className="px-4 py-2 rounded bg-green-600 text-white text-xs uppercase font-bold"
-                        >
-                            📹 Start Call
-                        </button>
-                    )}
-
-
-
-                    {canEdit && (
-                        <button
-                            disabled={isSaving}
-                            onClick={handleSave}
-                            className={`px-6 py-2 rounded bg-slate-900 dark:bg-gray-600 text-slate-50 dark:text-white text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-all active:scale-95 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                            {isSaving ? 'Publishing...' : 'Publish'}
-                        </button>
-                    )}
-                </div>
-            </nav>
+            {/* THEME TOGGLE */}
+            <button
+                onClick={() => setIsDark(!isDark)}
+                className="h-9 w-9 flex items-center justify-center rounded-full  text-slate-500 dark:text-gray-400  border-black/5 dark:border-white/10 backdrop-blur-xl shadow-sm transition-all"
+            >
+                {isDark ? <i className="bi bi-sun-fill"></i> : <i className="bi bi-moon-stars-fill"></i>}
+            </button>
+        </div>
+    </nav>
 
             <div className="max-w-[1400px] mx-auto">
                 <div className="bg-white dark:!bg-gray-300 rounded-2xl shadow-xl border border-slate-200 dark:border-gray-200 transition-colors duration-500 overflow-hidden">

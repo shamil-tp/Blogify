@@ -7,27 +7,46 @@ const DeleteConfirmationModal = ({ show, onClose, onConfirm, postTitle }) => {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-sm transform transition-all duration-300 scale-95">
-        <h2 className="text-xl font-['Outfit',_sans-serif] font-bold mb-4 text-slate-900 dark:text-white">
-          Confirm Deletion
-        </h2>
-        <p className="text-slate-600 dark:text-gray-400 mb-6 text-sm">
-          Are you sure you want to delete the post: **{postTitle}**? This action cannot be undone.
-        </p>
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm font-medium rounded-lg text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onConfirm}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors shadow-md active:scale-95"
-          >
-            Delete
-          </button>
+    <div className="fixed inset-0 bg-slate-900/40 dark:bg-black/80 flex items-center justify-center z-[100] p-4 backdrop-blur-md animate-in fade-in duration-300">
+      <div
+        className="relative overflow-hidden bg-white/80 dark:bg-[#0F0F0F]/90 border border-slate-200 dark:border-white/10 p-8 rounded-[32px] shadow-2xl w-full max-w-sm transform transition-all duration-500 scale-100 animate-in zoom-in-95"
+      >
+        {/* Decorative Background Glow */}
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 blur-[80px] pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-red-500/10 blur-[80px] pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
+              <i className="bi bi-exclamation-triangle-fill text-red-500"></i>
+            </div>
+            <h2 className="text-2xl font-['Outfit',_sans-serif] font-black text-slate-900 dark:text-white tracking-tight">
+              Confirm Deletion
+            </h2>
+          </div>
+
+          <p className="text-slate-500 dark:text-gray-400 mb-8 text-sm leading-relaxed">
+            Are you sure you want to delete <span className="text-slate-900 dark:text-white font-bold italic">"{postTitle}"</span>? <br />
+            <span className="text-[10px] uppercase tracking-widest opacity-60 font-black mt-2 block">This action is permanent.</span>
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={onConfirm}
+              style={{ borderRadius: '9999px' }}
+              className="w-full px-6 py-2 text-[10px] uppercase tracking-[0.2em] font-black bg-red-500 text-white hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 active:scale-95"
+            >
+              Delete Post
+            </button>
+
+            <button
+              onClick={onClose}
+              style={{ borderRadius: '9999px' }}
+              className="w-full px-6 py-2 text-[10px] uppercase tracking-[0.2em] font-black text-slate-500 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/5 border border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-all"
+            >
+              Go Back
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -166,38 +185,73 @@ export default function HomeFeed() {
       </style>
 
       {/* --- PREMIUM NAVIGATION --- */}
-      <nav className="sticky top-0 z-50 w-full glass-card border-b border-slate-200/50 dark:border-white/5 mb-8">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2 group cursor-pointer" onClick={() => navigate('/home')}>
-            <div className="w-8 h-8 bg-slate-900 dark:bg-white rounded-lg flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300 shadow-lg dark:shadow-white/10 overflow-hidden">
-              <img
-                src="/images/Logo.png"
-                alt="Logo"
-                className="w-5 h-5 object-contain"
-              />
-            </div>
-            <h2 className="font-['Outfit',_sans-serif] text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
-              ogDoc
-            </h2>
-          </div>
+       <nav className="sticky top-0 z-50 w-full glass-card border-b border-slate-200/50 dark:border-white/5 mb-8">
+  <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 md:py-4 flex justify-between items-center">
+    
+    {/* LOGO SECTION - Responsive scale */}
+    <div className="flex items-center gap-2 group cursor-pointer shrink-0" onClick={() => navigate('/home')}>
+      <div className="w-7 h-7 md:w-8 md:h-8 bg-slate-900 dark:bg-white rounded-lg flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300 shadow-lg dark:shadow-white/10 overflow-hidden">
+        <img
+          src="/images/Logo.png"
+          alt="Logo"
+          className="w-4 h-4 md:w-5 md:h-5 object-contain"
+        />
+      </div>
+      <h2 className="font-['Outfit',_sans-serif] text-lg md:text-xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+        ogDoc
+      </h2>
+    </div>
 
-          <div className="flex items-center gap-6">
-            <button
-              onClick={startNewStory}
-              disabled={isCreating}
-              className={`px-6 py-2.5 rounded-full bg-slate-900 dark:bg-blue-600 text-white text-xs uppercase tracking-widest font-black hover:scale-105 active:scale-95 transition-all shadow-lg shadow-blue-500/20 dark:shadow-blue-600/20 ${isCreating ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isCreating ? 'Creating...' : 'Start Writing'}
-            </button>
-            <button
-              onClick={() => setIsDark(!isDark)}
-              className="p-2.5 rounded-full bg-white dark:bg-[#1a1a1a] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 transition-all shadow-sm"
-            >
-              {isDark ? <i className="bi bi-sun-fill text-lg"></i> : <i className="bi bi-moon-stars-fill text-lg"></i>}
-            </button>
-          </div>
-        </div>
-      </nav>
+    {/* BUTTON SECTION - Optimized for mobile tap targets */}
+    <div className="flex items-center gap-2 md:gap-3">
+  {/* START WRITING BUTTON */}
+  <button
+    onClick={async () => {
+      try {
+        const res = await api.post('/api/blog/create-draft');
+        navigate(`/create/${res.data.blog._id}`);
+      } catch (e) { console.error("Error creating draft:", e); }
+    }}
+    style={{ borderRadius: '15px' }}
+    className="relative group/btn overflow-hidden px-4 md:px-7 py-2 md:py-2.5 
+               bg-white/80 dark:bg-[#0A0A0A]/80 
+               border border-dashed border-slate-200 dark:border-white/10
+               backdrop-blur-xl
+               text-slate-900 dark:text-white text-[9px] md:text-[10px] uppercase tracking-[0.15em] md:tracking-[0.2em] font-black 
+               transition-all duration-500 hover:scale-105 active:scale-95 
+               hover:border-blue-500/50 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+  >
+    {/* Matching Blue Shimmer */}
+    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-blue-500/10 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_2s_infinite]" />
+    <span className="relative z-10 group-hover/btn:text-blue-500 dark:group-hover/btn:text-blue-400 transition-colors duration-300 whitespace-nowrap">
+      create
+    </span>
+  </button>
+
+  {/* THEME TOGGLE BUTTON */}
+  <button
+    onClick={() => setIsDark(!isDark)}
+    style={{ borderRadius: '12px' }} 
+    className="relative h-9 w-9 md:h-[42px] md:w-[42px] flex items-center justify-center shrink-0
+              
+               backdrop-blur-xl 
+               text-slate-600 dark:text-gray-400 
+               hover:text-blue-500 dark:hover:text-blue-400 hover:border-blue-500/50 
+               transition-all duration-500 shadow-sm active:scale-90 group/theme"
+  >
+    <div className="relative z-10">
+      {isDark ? (
+        <i className="bi bi-sun-fill text-base md:text-lg transition-all duration-500 group-hover/theme:rotate-90"></i>
+      ) : (
+        <i className="bi bi-moon-stars-fill text-base md:text-lg transition-all duration-500 group-hover/theme:-rotate-12 group-hover/theme:scale-110"></i>
+      )}
+    </div>
+    {/* Background hover glow matching card style */}
+    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-blue-500/5 transition-opacity duration-500" />
+  </button>
+</div>
+  </div>
+</nav>
 
       {/* --- FEED SECTION --- */}
       <main className="max-w-6xl mx-auto px-6 py-4">
@@ -214,12 +268,16 @@ export default function HomeFeed() {
                 A premium minimalist space for your most important thoughts and professional documentation.
               </p>
             </div>
-            <div className="flex gap-4">
-              <div className="px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20">
-                <span className="block text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 font-bold">Total Stories</span>
-                <span className="text-2xl font-black text-slate-900 dark:text-white">{posts.length}</span>
-              </div>
-            </div>
+             <div className="w-full sm:w-auto px-3 sm:px-0 mb-0"> {/* px-3 matches your grid's mobile padding */}
+  <div className="w-full sm:w-fit px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20">
+    <span className="block text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400 font-bold">
+      Total Stories
+    </span>
+    <span className="text-2xl font-black text-slate-900 dark:text-white">
+      {posts.length}
+    </span>
+  </div>
+</div>
           </div>
         </header>
 
