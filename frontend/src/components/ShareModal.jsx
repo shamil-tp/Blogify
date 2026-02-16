@@ -174,17 +174,28 @@ const ShareModal = ({ open, onClose, docId, onlineUsers = [], currentSocketId, o
                 {isAuthor && (
                   <button
                     onClick={() => handleRemove(c.email)}
-                    className="text-[10px] font-bold text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:underline"
+                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                    title="Remove Collaborator"
                   >
-                    Remove
+                    <span className="material-icons-outlined text-sm">close</span>
                   </button>
                 )}
               </div>
             ))}
 
-            {/* Online Visitors (who are NOT persistent collaborators) */}
+            {/* Online Visitors (who are NOT persistent collaborators and NOT the current user) */}
             {onlineUsers
-              .filter(u => !collaborators.some(c => c.email === u.name || c.email === u.email)) // Rough filter
+              .reduce((unique, u) => {
+                // Filter out the current user (owner) and duplicates
+                const isMe = u.socketId === currentSocketId;
+                const alreadyAdded = unique.some(item => item.name === u.name);
+                const isPersistent = collaborators.some(c => c.email === u.name || c.email === u.email);
+
+                if (!isMe && !alreadyAdded && !isPersistent) {
+                  unique.push(u);
+                }
+                return unique;
+              }, [])
               .map((u, i) => (
                 <div key={`online-${i}`} className="flex items-center justify-between group">
                   <div className="flex items-center gap-3">
@@ -193,17 +204,18 @@ const ShareModal = ({ open, onClose, docId, onlineUsers = [], currentSocketId, o
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-slate-900 dark:text-white truncate max-w-[150px]">
-                        {u.name} (Online)
+                        {u.email || u.name}
                       </p>
                       <p className="text-[10px] text-slate-500">Visitor</p>
                     </div>
                   </div>
-                  {isAuthor && u.socketId !== currentSocketId && ( // Don't kick self
+                  {isAuthor && (
                     <button
                       onClick={() => onKick && onKick(u.socketId)}
-                      className="text-[10px] font-bold text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity hover:underline"
+                      className="p-1.5 text-slate-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all"
+                      title="Kick Visitor"
                     >
-                      Kick
+                      <span className="material-icons-outlined text-sm">close</span>
                     </button>
                   )}
                 </div>

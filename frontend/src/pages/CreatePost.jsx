@@ -311,10 +311,11 @@ const CreatePost = () => {
         });
 
 
-        // Set local awareness state (name/color)
+        // Set local awareness state (name/color/email)
         const userData = JSON.parse(localStorage.getItem('user')) || {};
         awarenessInstance.setLocalStateField('user', {
             name: userData.name || `Guest ${socket.id?.substring(0, 4) || ''}`,
+            email: userData.email || null,
             color: '#' + Math.floor(Math.random() * 16777215).toString(16) // Random color
         });
 

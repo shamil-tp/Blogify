@@ -20,6 +20,7 @@ const joinDoc = async (io, socket, blogId) => {
     const s = io.sockets.sockets.get(id);
     return {
       name: s.user?.name || "Anonymous",
+      email: s.user?.email || null,
       socketId: id,
     };
   });
