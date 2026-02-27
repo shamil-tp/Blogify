@@ -37,7 +37,7 @@ const googleLogin = async (req, res) => {
     };
     await user.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       accessToken,
       refreshToken,
@@ -46,7 +46,7 @@ const googleLogin = async (req, res) => {
 
   } catch (error) {
     console.error("Authentication Error Details:", error.message);
-    res.status(401).json({
+    return res.status(401).json({
       success: false,
       message: "Google authentication failed"
     });
@@ -71,7 +71,7 @@ const refresh = async (req, res) => {
 
     const newAccessToken = generateAccessToken(user._id);
 
-    res.status(200).json({
+    return res.status(200).json({
       accessToken: newAccessToken,
     });
 
@@ -86,11 +86,11 @@ const logout = async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, { $unset: { Rtoken: 1 } });
   }
 
-  res.status(200).json({ success: true, message: "Logged out successfully" });
+  return res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 
 const me = (req, res) => {
-  res.status(200).json({ user: req.user });
+  return res.status(200).json({ user: req.user });
 };
 
 module.exports = { googleLogin, logout, me, refresh };

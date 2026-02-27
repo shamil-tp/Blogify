@@ -1,5 +1,6 @@
 @import "tailwindcss";
-@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;700;800;900&display=swap');
+
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui;
@@ -10,7 +11,11 @@
 
 @layer base {
   html {
-    @apply font-sans antialiased;
+    @apply font-sans antialiased bg-white text-slate-900 transition-colors duration-500;
+  }
+
+  html.dark {
+    @apply bg-black text-white;
   }
 }
 
@@ -23,6 +28,4 @@
 .sidebar.sidebar-narrow-unfoldable:not(:hover) .sidebar-brand .brand-text {
   display: none;
 }
-
-
 

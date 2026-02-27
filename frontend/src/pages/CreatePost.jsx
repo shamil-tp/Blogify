@@ -1,9 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react' 
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from "react-router-dom";
 import api from '../api/axios'
 import axios from 'axios'
 import GridEditor from '../components/GridEditor/GridEditor'
+import ShareModal from '../components/ShareModal'
 import { v4 as uuidv4 } from 'uuid';
+import * as Y from 'yjs';
+import { initSocket, disconnectSocket, getSocket } from '../collaboration/socket';
+import { Awareness, encodeAwarenessUpdate, applyAwarenessUpdate } from 'y-protocols/awareness';
+import VideoCallPanel from '../components/VideoCallPanel';
+import IncomingCallModal from "../components/IncomingCallModal";
+import OutgoingCallModal from "../components/OutgoingCallModal";
+
 
 const initialWidgets = [
     {
@@ -16,7 +24,7 @@ const initialWidgets = [
 
 
 const ToolbarContainer = ({ children }) => (
-    <div className="flex flex-wrap gap-2 items-center pb-4 mb-4 border-b border-slate-200 dark:border-slate-700/50 transition-colors duration-300">
+    <div className="flex flex-wrap gap-2 items-center pb-4 mb-4 border-b border-slate-200 dark:border-gray-700/50 transition-colors duration-300">
         {children}
     </div>
 )
@@ -25,7 +33,7 @@ const ToolbarButton = ({ onClick, children, title }) => (
     <button
         onClick={onClick}
         title={title}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 text-sm font-medium bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-700 dark:!bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:!bg-slate-700"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-md transition-all duration-200 text-sm font-medium bg-white border border-slate-200 shadow-sm hover:bg-slate-50 text-slate-700 dark:!bg-gray-300 dark:border-gray-400 dark:text-gray-900 dark:hover:!bg-gray-400"
     >
         {children}
     </button>
@@ -40,14 +48,58 @@ const ToolbarIcon = ({ children }) => (
 
 // --- MAIN COMPONENT ---
 const CreatePost = () => {
+    const [socket, setSocket] = useState(null);
+
+    const [incomingCall, setIncomingCall] = useState(null);
+    const [outgoingCall, setOutgoingCall] = useState(null);
+    const [callAccepted, setCallAccepted] = useState(false);
+
+    const acceptCall = () => {
+        if (!socket || !incomingCall) return;
+
+        socket.emit("call:accept", {
+            to: incomingCall.from,
+            blogId: docId,
+        });
+        socket.emit("call:join", docId);
+        setCallAccepted(true);
+        setIncomingCall(null);
+    };
+
+    const declineCall = () => {
+        if (!socket || !incomingCall) return;
+
+        socket.emit("call:decline", {
+            to: incomingCall.from,
+        });
+
+        setIncomingCall(null);
+    };
+
+    const cancelCall = () => {
+        if (!socket || !outgoingCall) return;
+        socket.emit("call:decline", { to: outgoingCall.socketId }); // Using decline as a generic signal to end
+        setOutgoingCall(null);
+    };
+
     const { id } = useParams();
+    const isCreateMode = !id;
+    const [docId, setDocId] = useState(id || null);
     const navigate = useNavigate();
     const isEditMode = Boolean(id);
     const [loading, setLoading] = useState(isEditMode);
+    const [shareOpen, setShareOpen] = useState(false);
 
     const [widgets, setWidgets] = useState(initialWidgets)
     const [title, setTitle] = useState('')
+    const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false)
+    const [ydoc, setYdoc] = useState(null);
+    const [awareness, setAwareness] = useState(null);
+    const [collaborators, setCollaborators] = useState([]);
+    const [canEdit, setCanEdit] = useState(true);
+
+    const [yWidgets, setYWidgets] = useState(null);
 
     const [isDark, setIsDark] = useState(() => {
         if (typeof window !== "undefined") {
@@ -69,56 +121,317 @@ const CreatePost = () => {
 
     const fileInputRef = useRef(null);
 
+    // --- SYNC TITLE ACROSS COLLABORATORS ---
+    useEffect(() => {
+        if (!ydoc) return;
+        const yTitle = ydoc.getText('title');
+
+        const observer = (event) => {
+            if (event.transaction.origin === 'local') return;
+            const currentYTitle = yTitle.toString();
+            setTitle(currentYTitle);
+        };
+
+        yTitle.observe(observer);
+
+        // Initial sync if title is already in ydoc
+        const initialTitle = yTitle.toString();
+        if (initialTitle && initialTitle !== title) {
+            setTitle(initialTitle);
+        }
+
+        return () => yTitle.unobserve(observer);
+    }, [ydoc]);
+
     useEffect(() => {
         if (!isEditMode) return;
 
         const fetchPost = async () => {
             try {
-                const res = await api.get(`/api/blog/${id}`);
-                setTitle(res.data.blog.title);
+                const url = `/api/blog/${id}`;
+                console.log(`🔍 Fetching blog from: ${api.defaults.baseURL}${url}`);
+                const res = await api.get(url);
 
-                const loadedContent = res.data.blog.content;
+                if (res.data && res.data.blog) {
+                    const blog = res.data.blog;
+                    setTitle(blog.title);
+                    const loadedContent = blog.content;
 
-                if (Array.isArray(loadedContent) && loadedContent.length > 0) {
-                    if (loadedContent[0].layout && loadedContent[0].id) {
-                        const fixedWidgets = loadedContent.map(w => ({
-                            ...w,
-                            layout: {
-                                ...w.layout,
-                                y: typeof w.layout.y === "number" ? w.layout.y : Infinity
-                            }
-                        }));
-                        setWidgets(fixedWidgets);
+                    // Check permissions
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if (user && blog.author !== user._id) {
+                        const collab = blog.collaborators?.find(c => c.email === user.email);
+                        if (!collab || collab.role === 'view') {
+                            setCanEdit(false);
+                        }
+                    }
+
+                    if (Array.isArray(loadedContent) && loadedContent.length > 0) {
+                        if (loadedContent[0].layout && loadedContent[0].id) {
+                            const fixedWidgets = loadedContent.map(w => ({
+                                ...w,
+                                layout: {
+                                    ...w.layout,
+                                    y: typeof w.layout.y === "number" ? w.layout.y : Infinity
+                                }
+                            }));
+                            setWidgets(fixedWidgets);
+                        } else {
+                            setWidgets([{
+                                id: uuidv4(),
+                                type: 'text',
+                                content: '<p><em>(Legacy Post Content)</em></p>',
+                                layout: { x: 0, y: 0, w: 12, h: 20 }
+                            }]);
+                        }
                     } else {
-                        setWidgets([{
-                            id: uuidv4(),
-                            type: 'text',
-                            content: '<p><em>(Legacy Post Content)</em></p>',
-                            layout: { x: 0, y: 0, w: 12, h: 20 }
-                        }]);
+                        setWidgets(initialWidgets);
                     }
                 } else {
+                    console.warn("⚠️ Blog data is missing in response", res.data);
                     setWidgets(initialWidgets);
                 }
-
-                setLoading(false);
             } catch (err) {
-                console.error("Failed to load blog", err);
+                console.error("❌ Failed to load blog:", err);
+                if (err.response) {
+                    console.error("   Status:", err.response.status);
+                    console.error("   Data:", err.response.data);
+
+                    if (err.response.status === 404) {
+                        alert("The requested blog post was not found (404). Redirecting to home.");
+                        navigate("/home");
+                        return; // Don't set loading to false here as we are navigating
+                    }
+                } else {
+                    console.error("   Message:", err.message);
+                    alert("Network error: Could not connect to the backend server.");
+                }
+            } finally {
+                setLoading(false);
             }
         };
-
         fetchPost();
-    }, [id, isEditMode]);
+    }, [id, isEditMode, navigate]);
 
+    // Cleanup socket on unmount
+    useEffect(() => {
+        return () => {
+            disconnectSocket();
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on("call:incoming", (data) => {
+            setIncomingCall(data);
+        });
+
+        socket.on("call:accepted", () => {
+            setCallAccepted(true);
+            setOutgoingCall(null);
+        });
+
+        socket.on("call:declined", () => {
+            alert("Call rejected");
+            setOutgoingCall(null);
+        });
+
+        return () => {
+            socket.off("call:incoming");
+            socket.off("call:accepted");
+            socket.off("call:declined");
+        };
+    }, [socket]);
+
+    useEffect(() => {
+        console.log("📞 incomingCall =", incomingCall);
+    }, [incomingCall]);
+
+
+    // Initialize Yjs and Socket when docId is available
+    useEffect(() => {
+        if (!docId) return;
+
+        const doc = new Y.Doc();
+        setYdoc(doc);
+        const widgetsArray = doc.getArray('widgets');
+        setYWidgets(widgetsArray);
+
+        const yTitle = doc.getText('title');
+
+        const awarenessInstance = new Awareness(doc);
+        setAwareness(awarenessInstance);
+
+        const socket = initSocket(docId);
+        setSocket(socket);
+
+        socket.emit("doc:join", docId);
+
+
+        socket.on("doc:sync", (update) => {
+            console.log("Received doc:sync, applying update...");
+            Y.applyUpdate(doc, new Uint8Array(update), 'server');
+
+            // If local title is empty but Yjs title has content, update local state
+            if (title === '' && yTitle.toString() !== '') {
+                setTitle(yTitle.toString());
+            }
+        });
+
+        socket.on("doc:update", (update) => {
+            console.log("Received doc:update, applying update...");
+            Y.applyUpdate(doc, new Uint8Array(update), 'server');
+        });
+
+
+        // Track active users (legacy indicator)
+        socket.on("doc:users", (users) => {
+            setCollaborators(users);
+        });
+
+        socket.on("doc:kicked", () => {
+            alert("You have been removed from this document by the author.");
+            navigate("/home");
+        });
+
+        // Awareness events
+        socket.on("doc:awareness", (update) => {
+            applyAwarenessUpdate(awarenessInstance, new Uint8Array(update), 'server');
+        });
+
+        awarenessInstance.on('update', ({ added, updated, removed }, origin) => {
+            if (origin !== 'server') {
+                const update = encodeAwarenessUpdate(awarenessInstance, added.concat(updated).concat(removed));
+                socket.emit("doc:awareness", {
+                    blogId: docId,
+                    awareness: Array.from(update)
+                });
+            }
+        });
+
+
+        // Set local awareness state (name/color/email)
+        const userData = JSON.parse(localStorage.getItem('user')) || {};
+        awarenessInstance.setLocalStateField('user', {
+            name: userData.name || `Guest ${socket.id?.substring(0, 4) || ''}`,
+            email: userData.email || null,
+            color: '#' + Math.floor(Math.random() * 16777215).toString(16) // Random color
+        });
+
+        doc.on('update', (update, origin) => {
+            if (origin !== 'server') {
+                console.log("Sending doc:update to server...");
+                socket.emit('doc:update', {
+                    blogId: docId,
+                    update: Array.from(update)
+                });
+            }
+        });
+
+
+        // Sync Widgets Array
+        widgetsArray.observe((event) => {
+            if (event.transaction.origin === 'local') return;
+            setWidgets(widgetsArray.toArray());
+        });
+
+        return () => {
+            doc.destroy();
+            disconnectSocket(); // Re-connect if docId changes
+        };
+    }, [docId]);
+
+
+    // Initial sync from state to Yjs if Yjs is empty (e.g. first user to load doc)
+    useEffect(() => {
+        if (ydoc && title !== '') {
+            const yTitle = ydoc.getText('title');
+            if (yTitle.toString() === '') {
+                yTitle.doc.transact(() => {
+                    yTitle.insert(0, title);
+                }, 'local');
+            }
+        }
+    }, [title, ydoc]);
+
+
+    // Helper to update both local state and Yjs array
+    const updateWidgets = (newWidgets) => {
+        setWidgets(newWidgets);
+
+        if (!yWidgets) return;
+
+
+        const shouldSync = () => {
+            if (newWidgets.length !== widgets.length) return true;
+
+            return newWidgets.some((nw, i) => {
+                const ow = widgets[i];
+                if (!ow) return true;
+                if (nw.id !== ow.id) return true;
+                if (nw.type !== ow.type) return true;
+
+                // Check layout changes
+                if (nw.layout.x !== ow.layout.x ||
+                    nw.layout.y !== ow.layout.y ||
+                    nw.layout.w !== ow.layout.w ||
+                    nw.layout.h !== ow.layout.h) return true;
+
+                // Check content changes ONLY for non-text widgets
+                if (nw.type !== 'text' && nw.content !== ow.content) return true;
+
+                return false;
+            });
+        };
+
+        if (shouldSync()) {
+            yWidgets.doc.transact(() => {
+                yWidgets.delete(0, yWidgets.length);
+                yWidgets.insert(0, newWidgets);
+            }, 'local');
+        }
+    };
+
+
+    useEffect(() => {
+        if (!isCreateMode) return
+
+        const createDraft = async () => {
+            const res = await api.post('/api/blog/create-draft')
+            const newId = res.data.blog._id
+
+            setDocId(newId)
+            navigate(`/create/${newId}`, { replace: true })
+        }
+
+        createDraft()
+    }, [isCreateMode, docId])
+
+    const saveDraft = async () => {
+        if (!docId) return
+        await api.post(`/api/blog/updateblog/${docId}`, {
+            title,
+            content: widgets
+        })
+    }
+
+    useEffect(() => {
+        if (!isCreateMode) return
+
+        const timer = setTimeout(saveDraft, 2000)
+        return () => clearTimeout(timer)
+    }, [widgets, title, isCreateMode])
 
     const addTextWidget = () => {
         const newWidget = {
             id: uuidv4(),
             type: 'text',
-            content: '', 
+            content: '',
             layout: { x: 0, y: Infinity, w: 12, h: 4 }
         };
-        setWidgets([...widgets, newWidget]);
+        const newWidgets = [...widgets, newWidget];
+        updateWidgets(newWidgets);
     };
 
     const triggerImageUpload = () => {
@@ -151,7 +464,8 @@ const CreatePost = () => {
                 content: imageUrl,
                 layout: { x: 0, y: Infinity, w: 4, h: 8 }
             };
-            setWidgets([...widgets, newWidget]);
+            const newWidgets = [...widgets, newWidget];
+            updateWidgets(newWidgets);
 
         } catch (err) {
             console.error("Cloudinary upload error", err)
@@ -171,96 +485,170 @@ const CreatePost = () => {
                 content: url,
                 layout: { x: 0, y: Infinity, w: 6, h: 8 }
             };
-            setWidgets([...widgets, newWidget]);
+            const newWidgets = [...widgets, newWidget];
+            updateWidgets(newWidgets);
         }
     };
 
 
+
+
     const handleSave = async () => {
+        if (isSaving) return;
+        setIsSaving(true);
+        console.log('🚀 Publish button clicked');
+
         if (!title.trim()) {
             alert("Please enter a title for your post.");
+            setIsSaving(false);
+            return;
+        }
+
+        if (!docId) {
+            alert("Document ID is missing. Please try refreshing the page.");
+            setIsSaving(false);
             return;
         }
 
         try {
-            const sanitizedWidgets = widgets.map(w => ({
-                ...w,
-                layout: {
-                    ...w.layout,
-                    y: w.layout.y
+            console.log('📦 Preparing widgets for save...', { widgetCount: widgets.length, ydoc: !!ydoc });
+
+            const sanitizedWidgets = widgets.map(w => {
+                let content = w.content;
+                if (w.type === 'text' && ydoc) {
+                    const ytext = ydoc.getText(w.id);
+                    content = ytext.toString();
+                    console.log(`   Widget ${w.id}: Y.Text content length = ${content.length}`);
                 }
-            }));
-
-
+                return {
+                    ...w,
+                    content,
+                    layout: {
+                        ...w.layout,
+                        y: w.layout.y
+                    }
+                };
+            });
 
             const payload = {
                 title,
                 content: sanitizedWidgets,
             };
 
-            if (isEditMode) {
-                await api.post(`/api/blog/updateblog/${id}`, payload);
-                alert("Blog updated");
-            } else {
-                await api.post("/api/blog/postblog", payload);
-                alert("Blog published");
-            }
+            const response = await api.post(`/api/blog/updateblog/${docId}`, {
+                ...payload,
+                published: true
+            });
+
+            console.log('✅ Published successfully!');
             navigate("/home");
         } catch (error) {
-            console.error(error);
-            if (error.response && error.response.status === 400) {
-                alert("Cannot save: " + JSON.stringify(error.response.data));
-            } else {
-                alert("Error saving post");
-            }
+            console.error('❌ Publish failed:', error);
+            alert("Failed to publish document.");
+        } finally {
+            setIsSaving(false);
         }
     };
+
 
     if (loading) {
         return <div className="text-center mt-20">Loading editor...</div>;
     }
 
     return (
-        <div className="min-h-screen py-10 px-4 bg-slate-50 dark:bg-[#0f172a] font-['Inter',_sans-serif]">
-            <style>
-                {`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800&display=swap');
-          @import url('https://fonts.googleapis.com/icon?family=Material+Icons+Outlined');
-          @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css");
-        `}
-            </style>
+        <div className="min-h-screen py-10 px-4 bg-slate-50 dark:bg-black font-['Inter',_sans-serif]">
 
-            <nav className="max-w-6xl mx-auto flex justify-between items-center mb-12">
-                <h2 className="font-['Outfit',_sans-serif] text-xl font-bold tracking-tight text-slate-900 dark:!text-slate-100">
-                    New Story
-                </h2>
 
-                <div className="flex items-center gap-6">
-                    <button
-                        onClick={() => setIsDark(!isDark)}
-                        className="text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
-                    >
-                        {isDark ? <i className="bi bi-sun h3"></i> : <i className="bi bi-moon h3"></i>}
-                    </button>
-                    <button
-                        onClick={handleSave}
-                        className="px-6 py-2 rounded bg-slate-900 dark:bg-slate-100 text-slate-50 dark:text-slate-900 text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-all active:scale-95"
-                    >
-                        Publish
-                    </button>
-                </div>
-            </nav>
+           <nav className="max-w-6xl mx-auto flex flex-col gap-6 mb-4 md:mb-12 px-2 md:px-4">
+        {/* TOP ROW: Branding & Primary Action */}
+        <div className="flex items-center justify-between w-full mt-4 md:mt-0">
+       <h2 className="font-['Outfit',_sans-serif] text-2xl md:!text-[60px] font-bold tracking-tight text-slate-800 dark:text-gray-200 leading-tight">
+    New Story
+</h2>
+
+            {/* Primary Action - Always prominent */}
+            <button
+                onClick={handleSave}
+                className="px-6 py-2 md:px-8 md:py-2.5 rounded-full bg-blue-600 dark:bg-blue-500 text-white text-[10px] md:text-[11px] uppercase tracking-[0.15em] font-black active:scale-95 shadow-lg shadow-blue-500/25 border-[0.5px] border-white/10 flex items-center gap-2 transition-all"
+            >
+                <i className="bi bi-send-fill text-[12px]"></i>
+                <span>Publish</span>
+            </button>
+        </div>
+
+        {/* SECONDARY TOOLS: Repositioned for Mobile */}
+        {/* On mobile: Moves just above the container. On Desktop: Stays right-aligned */}
+        <div className="flex items-center justify-end gap-2 overflow-x-auto no-scrollbar py-1">
+            
+            {/* Active Collaborators */}
+            <div className="flex items-center gap-2 text-[10px] font-black   backdrop-blur-xl px-3 py-2 rounded-full  shadow-sm shrink-0">
+                <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+                </span>
+                <span className="text-slate-500 dark:text-slate-400">
+                    {collaborators.length} <span className="hidden lg:inline">Online</span>
+                </span>
+            </div>
+
+            {/* SHARE */}
+            <button
+                disabled={!docId}
+                onClick={() => setShareOpen(true)}
+                className={`h-9 w-9 md:w-auto md:px-4 flex items-center justify-center gap-2 rounded-full text-[10px] font-black uppercase tracking-wider backdrop-blur-xl  transition-all
+                    ${docId 
+                        ? " text-slate-700 dark:text-slate-300 dark:border-white/10 shadow-sm" 
+                        : "opacity-40 cursor-not-allowed"}`}
+            >
+                <i className="bi bi-share-fill"></i>
+                <span className="hidden md:inline">Share</span>
+            </button>
+
+            {/* CALL */}
+            <button
+                onClick={() => {
+                    const otherUsers = collaborators.filter(c => c.socketId && c.socketId !== socket.id);
+                    if (otherUsers.length === 0) { alert("No one online"); return; }
+                    otherUsers.forEach(user => socket.emit("call:invite", { blogId: docId, to: user.socketId }));
+                    setOutgoingCall(otherUsers[0]);
+                }}
+                className="h-9 w-9 md:w-auto md:px-4 flex items-center justify-center gap-2 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400  backdrop-blur-xl shadow-sm transition-all"
+            >
+                <i className="bi bi-camera-video-fill"></i>
+                <span className="hidden md:inline">Call</span>
+            </button>
+
+            {/* THEME TOGGLE */}
+            <button
+                onClick={() => setIsDark(!isDark)}
+                className="h-9 w-9 flex items-center justify-center rounded-full  text-slate-500 dark:text-gray-400  border-black/5 dark:border-white/10 backdrop-blur-xl shadow-sm transition-all"
+            >
+                {isDark ? <i className="bi bi-sun-fill"></i> : <i className="bi bi-moon-stars-fill"></i>}
+            </button>
+        </div>
+    </nav>
 
             <div className="max-w-[1400px] mx-auto">
-                <div className="bg-white dark:!bg-[#1e293b] rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 transition-colors duration-500 overflow-hidden">
+                <div className="bg-white dark:!bg-gray-300 rounded-2xl shadow-xl border border-slate-200 dark:border-gray-200 transition-colors duration-500 overflow-hidden">
 
                     <div className="p-4 sm:p-8 min-h-[80vh]">
 
                         <input
-                            type="text"
+                            readOnly={!canEdit}
                             placeholder="Title..."
                             value={title}
-                            onChange={e => setTitle(e.target.value)}
+                            onChange={e => {
+                                if (!canEdit) return;
+                                const newTitle = e.target.value;
+                                setTitle(newTitle);
+                                if (ydoc) {
+                                    const yTitle = ydoc.getText('title');
+                                    yTitle.doc.transact(() => {
+                                        yTitle.delete(0, yTitle.length);
+                                        yTitle.insert(0, newTitle);
+                                    }, 'local');
+                                }
+                            }}
                             style={{
                                 padding: "1rem",
                                 margin: "1rem",
@@ -272,44 +660,88 @@ const CreatePost = () => {
                                 backgroundColor: "transparent",
                                 transition: "all 0.3s ease",
                             }}
-                            className="w-full font-['Outfit',_sans-serif] text-[#ffffffff] text-2xl md:text-4xl font-bold bg-transparent border-none focus:outline-none p-0 text-slate-700 placeholder:text-slate-300 dark:placeholder:text-slate-600 dark:text-slate-500"
+                            className="w-full font-['Outfit',_sans-serif] text-[#ffffffff] text-2xl md:text-4xl font-bold bg-transparent border-none focus:outline-none p-0 text-slate-700 placeholder:text-slate-300 dark:placeholder:text-gray-400 dark:text-gray-400"
                         />
 
                         {/* TOOLBAR */}
-                        <div className="sticky top-0 z-20 bg-white/95 dark:!bg-[#1e293b]/95 backdrop-blur-sm transition-colors duration-500 rounded mb-5 shadow-sm">
-                            <ToolbarContainer>
-                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2 ml-1">Add Content:</span>
+                        {canEdit && (
+                            <div className="sticky top-0 z-20 bg-white/95 dark:!bg-gray-300/95 backdrop-blur-sm transition-colors duration-500 rounded mb-5 shadow-sm">
+                                <ToolbarContainer>
+                                    <span className="text-xs font-bold text-gray-600 dark:text-gray-600 uppercase tracking-wider mr-2 ml-1">Add Content:</span>
 
-                                <ToolbarButton onClick={addTextWidget} title="Add Text Block">
-                                    <ToolbarIcon>text_fields</ToolbarIcon> Text
-                                </ToolbarButton>
+                                    <ToolbarButton onClick={addTextWidget} title="Add Text Block">
+                                        <ToolbarIcon>text_fields</ToolbarIcon> Text
+                                    </ToolbarButton>
 
-                                <ToolbarButton onClick={triggerImageUpload} title="Add Image">
-                                    <ToolbarIcon>{isUploading ? 'sync' : 'add_photo_alternate'}</ToolbarIcon> Image
-                                </ToolbarButton>
-                                {/* Hidden Input */}
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    ref={fileInputRef}
-                                    onChange={handleImageUpload}
-                                    disabled={isUploading}
-                                />
+                                    <ToolbarButton onClick={triggerImageUpload} title="Add Image">
+                                        <ToolbarIcon>{isUploading ? 'sync' : 'add_photo_alternate'}</ToolbarIcon> Image
+                                    </ToolbarButton>
+                                    {/* Hidden Input */}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        ref={fileInputRef}
+                                        onChange={handleImageUpload}
+                                        disabled={isUploading}
+                                    />
 
-                                <ToolbarButton onClick={addVideoWidget} title="Add Video Embed">
-                                    <ToolbarIcon>smart_display</ToolbarIcon> Video
-                                </ToolbarButton>
-                            </ToolbarContainer>
-                        </div>
+                                    <ToolbarButton onClick={addVideoWidget} title="Add Video Embed">
+                                        <ToolbarIcon>smart_display</ToolbarIcon> Video
+                                    </ToolbarButton>
+                                </ToolbarContainer>
+                            </div>
+                        )}
 
                         {/* GRID EDITOR CANVAS */}
-                        <GridEditor widgets={widgets} setWidgets={setWidgets} />
+                        <div className="dark:bg-gray-300">
+                            <GridEditor widgets={widgets} setWidgets={updateWidgets} ydoc={ydoc} awareness={awareness} readOnly={!canEdit} />
+                        </div>
 
                     </div>
                 </div>
             </div>
+
+            <ShareModal
+                open={shareOpen}
+                onClose={() => setShareOpen(false)}
+                docId={docId}
+                onlineUsers={collaborators}
+                currentSocketId={socket?.id}
+                onKick={(socketId) => {
+                    if (socket) {
+                        socket.emit("doc:kick", { blogId: docId, socketId });
+                    }
+                }}
+            />
+            {incomingCall && (
+                <IncomingCallModal
+                    caller={incomingCall}
+                    onAccept={acceptCall}
+                    onDecline={declineCall}
+                />
+            )}
+
+            {outgoingCall && (
+                <OutgoingCallModal
+                    callee={outgoingCall}
+                    onCancel={cancelCall}
+                />
+            )}
+
+            {callAccepted && (
+                <VideoCallPanel
+                    socket={socket}
+                    blogId={docId}
+                    onLeave={() => {
+                        setCallAccepted(false);
+                        setIncomingCall(null);
+                    }}
+                />
+            )}
+
         </div>
+
     )
 }
 

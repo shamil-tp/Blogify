@@ -1,7 +1,9 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const connectDB = require("./config/db"); 
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
 const blogRoutes = require("./routes/blogRoutes");
@@ -9,39 +11,92 @@ const blogRoutes = require("./routes/blogRoutes");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const helmet = require('helmet')
-const rateLimit = require('express-rate-limit')
-const hpp = require('hpp')
+// 1. CORS - MUST BE FIRST to catch all requests and provide headers
+app.use(
+	cors({
+		origin: (origin, callback) => {
+			if (!origin) return callback(null, true);
 
+			const allowedOrigins = [
+				"http://localhost:5173",
+				"http://localhost:5174",
+				"http://localhost:5175",
+				process.env.FRONTEND_URL,
+				"https://og-doc.vercel.app",
+			];
+
+			const isAllowed = allowedOrigins.some(ao => ao && ao.replace(/\/$/, '').toLowerCase() === origin.replace(/\/$/, '').toLowerCase()) ||
+				origin.endsWith(".onrender.com") ||
+				origin.includes("ngrok-free") ||
+				origin.endsWith(".vercel.app");
+
+			if (isAllowed) {
+				callback(null, true);
+			} else {
+				console.error("❌ CORS Blocked:", origin);
+				callback(new Error('CORS not allowed for this origin'));
+			}
+		},
+		credentials: true,
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+		allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+		exposedHeaders: ['Set-Cookie']
+	})
+);
+
+// 2. Security Headers (configured to allow cross-origin communication)
+app.use(helmet({
+	crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+	crossOriginResourcePolicy: { policy: "cross-origin" },
+	crossOriginEmbedderPolicy: false,
+	contentSecurityPolicy: false,
+	referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+}));
+
+// 3. Rate Limiting (moved below CORS so preflight OPTIONS requests aren't blocked silently)
 const limiter = rateLimit({
-	windowMs: 15 * 60 * 1000, 
-	limit: 100, 
-	standardHeaders: 'draft-8', 
-	legacyHeaders: false, 
-	ipv6Subnet: 56, 
+	windowMs: 15 * 60 * 1000,
+	limit: 500, // Increased limit for testing
+	standardHeaders: 'draft-8',
+	legacyHeaders: false,
 })
-
 app.use(limiter)
 
-app.use(helmet())
-
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175",process.env.FRONTEND_URL,process.env.LIBRARY_URL],
-    credentials:true
-  })
-);
+const hpp = require('hpp')
+const http = require("http")
+const initSocket = require("./socket");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(hpp())
 connectDB()
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+	res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+	res.status(200).json({
+		message: 'ogDoc API Server',
+		version: '1.0.0',
+		endpoints: {
+			auth: '/api/auth',
+			blog: '/api/blog'
+		}
+	});
+});
+
 app.use("/api/auth", authRoutes);
-app.use("/api", blogRoutes);
+app.use("/api/blog", blogRoutes);
 
 if (require.main === module) {
-  app.listen(PORT);
-}
 
+	const server = http.createServer(app);
+	initSocket(server);
+
+	console.log(`Attempting to listen on port ${PORT}`);
+	server.listen(PORT, () => console.log(`Server running on ${PORT}`));
+}
 module.exports = app;

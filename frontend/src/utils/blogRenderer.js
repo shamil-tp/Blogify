@@ -386,27 +386,6 @@ function renderBlogPost(blog, theme) {
     const article = document.createElement('article');
     Object.assign(article.style, theme.article);
 
-    // Title
-    const title = document.createElement('h1');
-    title.innerText = blog.title;
-    Object.assign(title.style, theme.title);
-    article.append(title);
-
-    // Date
-    const dateOfCreation = new Date(blog.createdAt);
-    const dateString = dateOfCreation.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    const timeString = dateOfCreation.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
-    const publishedOn = document.createElement('h5');
-    publishedOn.innerText = `Published on ${dateString} • ${timeString}`;
-    Object.assign(publishedOn.style, theme.publlishedOn);
-    article.append(publishedOn);
-
-    // Separator
-    const hr = document.createElement('hr');
-    Object.assign(hr.style, theme.hr);
-    article.append(hr);
-
     // --- GRID LAYOUT CONTAINER ---
     const gridDiv = document.createElement('div');
     gridDiv.style.display = 'grid';

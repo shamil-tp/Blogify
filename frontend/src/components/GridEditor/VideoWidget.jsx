@@ -10,7 +10,7 @@ const VideoWidget = ({ url }) => {
     }
 
     return (
-        <div className="w-full h-full overflow-hidden rounded-lg shadow-sm bg-black relative">
+        <div className="w-full h-full overflow-hidden rounded-lg shadow-sm bg-gray-300 dark:bg-gray-300 relative">
             {/* Overlay to allow dragging over the iframe without getting captured by the iframe */}
             <div className="absolute inset-0 z-10 hover:bg-black/10 transition-colors cursor-move"></div>
             <iframe
